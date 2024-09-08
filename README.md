@@ -1,0 +1,1 @@
+Work-In-Progress packages I am using in my Swift Projects, such as Boomic, Vincar, and hede. Once they are more mature and better documented, they well be removed from this repo and put into their own.
