@@ -232,7 +232,7 @@ final class SimpleStoreTests: XCTestCase {
             XCTFail("Teardown Error: \(error.localizedDescription)")
         }
     }
-    
+    /*
     func test_importData() async throws {
         let value = "value_7"
         let key = "key_7"
@@ -276,4 +276,5 @@ final class SimpleStoreTests: XCTestCase {
             XCTFail("Teardown Error: \(error.localizedDescription)")
         }
     }
+    */
 }

@@ -7,22 +7,28 @@
 
 import Foundation
 
-/// This could be conformed by `Equatable` and `Comparable`, however, I am leaving the option open to use different ones.
-/// Even better would be closures passed in, but those aren't codable. Still debating on how to best support more then one
-/// `SetSortable` on the same type in the same namespace.
-public protocol SetSortable {
-    static func compare(_ a: Self, _ b: Self) -> Bool
-    static func isEqual(_ a: Self, _ b: Self) -> Bool
-}
 
 /// Sorted set is a set that maintains a sorted order. This reduces lookup time to `O(log n)`.
-public struct SortedSet<Element: SetSortable> {
+public struct SortedSet<Element: Comparable> {
     
     public init() {
         self.storage = []
     }
     
-    private var storage: [Element] = []
+    public init(contentsOf elements: [Element]) {
+        self.storage = elements.sorted().reduce(into: []) { uniqueElements, currentElement in
+            if uniqueElements.last != currentElement {
+                uniqueElements.append(currentElement)
+            }
+        }
+    }
+    
+    /// Quickload doesn't sort the elements or remove dupes. assumes the array is already a valid sorted set.
+    private init(quickLoad elements: [Element]) {
+        self.storage = elements
+    }
+    
+    internal var storage: [Element] = []
     
     public var values: [Element] { storage }
     public var count: Int { storage.count }
@@ -32,7 +38,7 @@ public struct SortedSet<Element: SetSortable> {
     }
     
     public subscript(element: Element) -> Element? {
-        let result = binarySearch(for: element)
+        let result = SortingLogic.binarySearch(for: element, in: storage)
         if result.exists {
             return storage[result.index]
         } else {
@@ -41,7 +47,7 @@ public struct SortedSet<Element: SetSortable> {
     }
     
     public mutating func insert(_ element: Element) {
-        let result = binarySearch(for: element)
+        let result = SortingLogic.binarySearch(for: element, in: storage)
         if result.exists {
             storage[result.index] = element
         } else {
@@ -70,17 +76,18 @@ public struct SortedSet<Element: SetSortable> {
     }
     
     public mutating func union(_ set: SortedSet<Element>) {
-        overwriteMerge(set: set)
+        storage = SortingLogic.overwriteMerge(set.values, into: storage)
     }
     
     public func unioning(_ set: SortedSet<Element>) -> Self {
-        var newSet = self
-        newSet.overwriteMerge(set: set)
-        return newSet
+        return SortedSet<Element>(
+            quickLoad: SortingLogic.overwriteMerge(set.values, into: self.values)
+        )
+        
     }
     
     public mutating func remove(_ element: Element) {
-        let result = binarySearch(for: element)
+        let result = SortingLogic.binarySearch(for: element, in: storage)
         if result.exists {
             storage.remove(at: result.index)
         }
@@ -105,104 +112,23 @@ public struct SortedSet<Element: SetSortable> {
         }
         return newSet
     }
+}
 
-    public func reduce<Result>(_ initialResult: Result, _ nextPartialResult: (Result, Element) -> Result) -> Result {
-        return storage.reduce(initialResult, nextPartialResult)
-    }
-    
-    public func reduce<Result>(into initialResult: inout Result, _ updateAccumulatingResult: (inout Result, Element) -> Void) {
-        for element in storage {
-            updateAccumulatingResult(&initialResult, element)
-        }
-    }
-    
-    public func filter(_ isIncluded: (Element) throws -> Bool) rethrows -> Self {
-        var newSet = Self<Element>()
-        for element in storage {
-            if try isIncluded(element) {
-                newSet.storage.append(element)
-            }
-        }
-        return newSet
-    }
-    
-    public func forEach(_ body: (Element) throws -> Void) rethrows {
-        try storage.forEach(body)
-    }
-    
-    public func map<T>(_ transform: (Element) throws -> T) rethrows -> [T] {
-        try storage.map(transform)
-    }
-    
-    public func compactMap<T>(_ transform: (Element) throws -> T?) rethrows -> [T] {
-        try storage.compactMap(transform)
-    }
-    
-    private func binarySearch(for element: Element) -> (index: Int, exists: Bool) {
-        var low = 0
-        var high = storage.count - 1
-        while low <= high {
-            let mid = (low + high) / 2
-            if Element.isEqual(storage[mid], element) {
-                return (mid, true)
-            } else if Element.compare(storage[mid], element) {
-                low = mid + 1
-            } else {
-                high = mid - 1
-            }
-        }
-        return (low, false)
-    }
-    
-    private mutating func overwriteMerge(set newSet: SortedSet<Element>) {
-        let new = newSet.values
-        var merged: [Element] = []
-        var storageIndex = 0
-        var newIndex = 0
-        
-        while storageIndex < storage.count && newIndex < new.count {
-            if Element.compare(storage[storageIndex], new[newIndex]) {
-                merged.append(storage[storageIndex])
-                storageIndex += 1
-            } else if Element.compare(new[newIndex], storage[storageIndex]) {
-                merged.append(new[newIndex])
-                newIndex += 1
-            } else {
-                merged.append(new[newIndex])
-                storageIndex += 1
-                newIndex += 1
-            }
-        }
-        
-        if storageIndex < storage.count {
-            merged.append(contentsOf: storage.dropFirst(storageIndex))
-        } else if newIndex < new.count {
-            merged.append(contentsOf: new.dropFirst(newIndex))
-        }
-        
-        storage = merged
+extension SortedSet where Element: Hashable {
+    public init(set: Set<Element>) {
+        self.storage = set.sorted()
     }
 }
 
-extension SortedSet: Codable where Element: Codable {
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(storage, forKey: .storage)
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        storage = try container.decode([Element].self, forKey: .storage)
-    }
-
-    private enum CodingKeys: String, CodingKey {
-        case storage
-    }
-}
+extension SortedSet: Codable where Element: Codable { }
+extension SortedSet: ArrayBackedCollectionImpl { }
 
 extension SortedSet: SortedSetPublicInterface { }
 private protocol SortedSetPublicInterface {
-    associatedtype Element: SetSortable
+    associatedtype Element: Comparable
+    
+    init()
+    init(contentsOf elements: [Element])
     
     subscript(index: Int) -> Element { get }
     subscript(element: Element) -> Element? { get }
@@ -215,7 +141,6 @@ private protocol SortedSetPublicInterface {
     func inserting(_ element: Element) -> Self
     func inserting(contentsOf elements: [Element]) -> Self
 
-    
     mutating func union(_ set: SortedSet<Element>)
     func unioning(_ set: SortedSet<Element>) -> Self
 
