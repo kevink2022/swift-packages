@@ -5,7 +5,7 @@
 //  Created by Kevin Kelly on 11/24/24.
 //
 
-internal protocol ArrayBackedCollection {
+public protocol ArrayBackedCollection {
     associatedtype Element
     
     func reduce<Result>(_ initialResult: Result, _ nextPartialResult: (Result, Element) -> Result) -> Result
@@ -20,13 +20,13 @@ internal protocol ArrayBackedCollection {
     func compactMap<T>(_ transform: (Element) throws -> T?) rethrows -> [T]
 }
 
-internal protocol ArrayBackedCollectionImpl {
+internal protocol ArrayBackedCollectionImpl: ArrayBackedCollection {
     associatedtype Element
     var storage: [Element] { get set }
     init()
 }
 
-extension ArrayBackedCollectionImpl {
+extension ArrayBackedCollectionImpl  {
     public func reduce<Result>(_ initialResult: Result, _ nextPartialResult: (Result, Element) -> Result) -> Result {
         return storage.reduce(initialResult, nextPartialResult)
     }

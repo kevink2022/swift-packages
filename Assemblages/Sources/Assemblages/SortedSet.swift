@@ -76,14 +76,13 @@ public struct SortedSet<Element: Comparable> {
     }
     
     public mutating func union(_ set: SortedSet<Element>) {
-        storage = SortingLogic.overwriteMerge(set.values, into: storage)
+        storage = SortingLogic.merge(set.values, into: storage, overwrite: true)
     }
     
     public func unioning(_ set: SortedSet<Element>) -> Self {
         return SortedSet<Element>(
-            quickLoad: SortingLogic.overwriteMerge(set.values, into: self.values)
+            quickLoad: SortingLogic.merge(set.values, into: self.values, overwrite: true)
         )
-        
     }
     
     public mutating func remove(_ element: Element) {
@@ -121,7 +120,9 @@ extension SortedSet where Element: Hashable {
 }
 
 extension SortedSet: Codable where Element: Codable { }
-extension SortedSet: ArrayBackedCollectionImpl { }
+extension SortedSet: ArrayBackedCollectionImpl {
+    public typealias Element = Element
+}
 
 extension SortedSet: SortedSetPublicInterface { }
 private protocol SortedSetPublicInterface {

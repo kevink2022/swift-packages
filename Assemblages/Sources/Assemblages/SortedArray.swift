@@ -58,11 +58,11 @@ public struct SortedArray<Element: Comparable> {
     }
     
     public mutating func merge(with array: SortedArray<Element>) {
-        storage = SortingLogic.merge(array.values, into: storage)
+        storage = SortingLogic.merge(array.values, into: storage, overwrite: false)
     }
     
     public func merging(with array: SortedArray<Element>) -> Self {
-        return SortedArray(quickLoad: SortingLogic.merge(array.values, into: storage))
+        return SortedArray(quickLoad: SortingLogic.merge(array.values, into: storage, overwrite: false))
     }
     
     public mutating func remove(at index: Int) { storage.remove(at: index) }
@@ -88,7 +88,9 @@ public struct SortedArray<Element: Comparable> {
 }
 
 extension SortedArray: Codable where Element: Codable { }
-extension SortedArray: ArrayBackedCollectionImpl { }
+extension SortedArray: ArrayBackedCollectionImpl {
+    public typealias Element = Element
+}
 
 extension SortedArray: SortedArrayPublicInterface { }
 
