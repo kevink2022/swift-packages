@@ -1,5 +1,5 @@
 import XCTest
-@testable import Domain
+@testable import Assemblages
 
 class CountedSetTests: XCTestCase {
     

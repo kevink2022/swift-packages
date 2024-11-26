@@ -1,5 +1,5 @@
 import XCTest
-@testable import Domain
+@testable import Assemblages
 
 fileprivate struct TestElement: Comparable {
     static func < (lhs: TestElement, rhs: TestElement) -> Bool {
