@@ -18,12 +18,19 @@ public protocol ArrayBackedCollection {
     func map<T>(_ transform: (Element) throws -> T) rethrows -> [T]
     
     func compactMap<T>(_ transform: (Element) throws -> T?) rethrows -> [T]
+    
+    mutating func remove(at index: Int)
+    mutating func removeLast()
+    mutating func removeLast(_ k: Int)
+    mutating func removeFirst()
+    mutating func removeFirst(_ k: Int)
+    mutating func removeSubrange(_ bounds: Range<Int>)
+    mutating func removeAll()
 }
 
 internal protocol ArrayBackedCollectionImpl: ArrayBackedCollection {
     associatedtype Element
     var storage: [Element] { get set }
-    init()
 }
 
 extension ArrayBackedCollectionImpl  {
@@ -38,7 +45,8 @@ extension ArrayBackedCollectionImpl  {
     }
     
     public func filter(_ isIncluded: (Element) throws -> Bool) rethrows -> Self {
-        var newSet = Self()
+        var newSet = self
+        newSet.storage = []
         for element in storage {
             if try isIncluded(element) {
                 newSet.storage.append(element)
@@ -58,5 +66,13 @@ extension ArrayBackedCollectionImpl  {
     public func compactMap<T>(_ transform: (Element) throws -> T?) rethrows -> [T] {
         try storage.compactMap(transform)
     }
+    
+    public mutating func remove(at index: Int) { storage.remove(at: index) }
+    public mutating func removeLast() { storage.removeLast() }
+    public mutating func removeLast(_ k: Int) { storage.removeLast(k) }
+    public mutating func removeFirst() { storage.removeFirst() }
+    public mutating func removeFirst(_ k: Int) { storage.removeFirst(k) }
+    public mutating func removeSubrange(_ bounds: Range<Int>) { storage.removeSubrange(bounds) }
+    public mutating func removeAll() { storage = [] }
 }
 

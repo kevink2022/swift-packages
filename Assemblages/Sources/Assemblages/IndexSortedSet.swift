@@ -94,28 +94,6 @@ public struct IndexSortedSet<Element> {
         return newSet
     }
     
-    public mutating func union(_ set: Self) {
-        storage = SortingLogic.merge(
-            set.values
-            , into: storage
-            , lessThan: lessThan
-            , overwrite: true
-        )
-    }
-    
-    public func unioning(_ set: Self) -> Self {
-        return Self(
-            lessThan: lessThan
-            , equalTo: equalTo
-            , quickLoad: SortingLogic.merge(
-                set.values
-                , into: storage
-                , lessThan: lessThan
-                , overwrite: true
-            )
-        )
-    }
-    
     public mutating func remove(_ element: Element) {
         let result = SortingLogic.binarySearch(
             for: element
@@ -162,4 +140,8 @@ extension IndexSortedSet where Element: Hashable {
             , quickLoad: set.sorted(by: { lessThan($0, $1) } )
         )
     }
+}
+
+extension IndexSortedSet: ArrayBackedCollectionImpl {
+    public typealias Element = Element
 }

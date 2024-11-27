@@ -44,16 +44,22 @@ public struct SortedArray<Element: Comparable> {
     }
     
     public mutating func insert(contentsOf elements: [Element]) {
-        for element in elements {
-            insert(element)
-        }
+        let elements = elements.sorted()
+        storage = SortingLogic.merge(
+            elements
+            , into: storage
+            , overwrite: false
+        )
     }
     
     public func inserting(contentsOf elements: [Element]) -> Self {
         var newSet = self
-        elements.forEach { element in
-            newSet.insert(element)
-        }
+        let elements = elements.sorted()
+        newSet.storage = SortingLogic.merge(
+            elements
+            , into: storage
+            , overwrite: false
+        )
         return newSet
     }
     
@@ -64,13 +70,6 @@ public struct SortedArray<Element: Comparable> {
     public func merging(with array: SortedArray<Element>) -> Self {
         return SortedArray(quickLoad: SortingLogic.merge(array.values, into: storage, overwrite: false))
     }
-    
-    public mutating func remove(at index: Int) { storage.remove(at: index) }
-    public mutating func removeLast() { storage.removeLast() }
-    public mutating func removeLast(_ k: Int) { storage.removeLast(k) }
-    public mutating func removeFirst() { storage.removeFirst() }
-    public mutating func removeFirst(_ k: Int) { storage.removeFirst(k) }
-    public mutating func removeSubrange(_ bounds: Range<Int>) { storage.removeSubrange(bounds) }
     
     public func removing(at index: Int) -> Self {
         var newArray = storage
@@ -88,6 +87,7 @@ public struct SortedArray<Element: Comparable> {
 }
 
 extension SortedArray: Codable where Element: Codable { }
+
 extension SortedArray: ArrayBackedCollectionImpl {
     public typealias Element = Element
 }
