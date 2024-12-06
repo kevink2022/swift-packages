@@ -88,7 +88,7 @@ public struct SortedArray<Element: Comparable> {
 
 extension SortedArray: Codable where Element: Codable { }
 
-extension SortedArray: ArrayBackedCollectionImpl {
+extension SortedArray: ArrayMutableCollectionImpl {
     public typealias Element = Element
 }
 

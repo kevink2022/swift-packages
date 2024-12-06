@@ -84,6 +84,6 @@ public struct IndexSortedArray<Element> {
     }
 }
 
-extension IndexSortedArray: ArrayBackedCollectionImpl {
+extension IndexSortedArray: ArrayMutableCollectionImpl {
     public typealias Element = Element
 }

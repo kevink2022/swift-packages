@@ -120,7 +120,7 @@ extension SortedSet where Element: Hashable {
 }
 
 extension SortedSet: Codable where Element: Codable { }
-extension SortedSet: ArrayBackedCollectionImpl {
+extension SortedSet: ArrayMutableCollectionImpl {
     public typealias Element = Element
 }
 

@@ -142,6 +142,6 @@ extension IndexSortedSet where Element: Hashable {
     }
 }
 
-extension IndexSortedSet: ArrayBackedCollectionImpl {
+extension IndexSortedSet: ArrayMutableCollectionImpl {
     public typealias Element = Element
 }

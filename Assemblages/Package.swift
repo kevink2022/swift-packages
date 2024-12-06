@@ -25,3 +25,13 @@ let package = Package(
             dependencies: ["Assemblages"]),
     ]
 )
+
+
+/// To do:
+///  - make the regular sorted use an index sorted internally
+///  - make `inserting` and `removing` based on `insert` and `remove`
+///  - update the tests to reuse logic:
+///     - array/set tests
+///     - array readable/mutable tests
+///  - make reference sorted key set.
+

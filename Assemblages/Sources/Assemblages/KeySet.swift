@@ -15,6 +15,10 @@ public struct KeySet<Element: Identifiable> {
         storage = [:]
     }
     
+    public init(contentsOf elements: [Element]) {
+        storage = elements.reduce(into: [:]) { $0[$1.id] = $1 }
+    }
+    
     private var storage: [Element.ID: Element] = [:]
     
     public var count: Int { storage.count }
@@ -113,6 +117,10 @@ public struct KeySet<Element: Identifiable> {
     
     public func compactMap<T>(_ transform: (Element) throws -> T?) rethrows -> [T] {
         try storage.values.compactMap(transform)
+    }
+    
+    public mutating func removeAll() {
+        storage = [:]
     }
 }
 

@@ -147,9 +147,9 @@ class IndexSortedSetTests: XCTestCase {
             .inserting(TestElement(string: "a", version: 1))
             .inserting(TestElement(string: "b", version: 1))
             .inserting(TestElement(string: "c", version: 1))
-        
+    
         let filteredSet = set.filter { $0.string != "b" }
-        
+    
         XCTAssertEqual(filteredSet.count, 2)
         XCTAssertEqual(filteredSet[0].string, "a")
         XCTAssertEqual(filteredSet[1].string, "c")
