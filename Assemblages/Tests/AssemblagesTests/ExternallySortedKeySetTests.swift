@@ -6,7 +6,7 @@
 //
 
 import XCTest
-import Assemblages
+@testable import Assemblages
 
 private final class Test: Identifiable, Comparable {
     let id: Int
@@ -23,7 +23,7 @@ private final class Test: Identifiable, Comparable {
     }
     
     static func < (lhs: Test, rhs: Test) -> Bool {
-        lhs.id < rhs.id
+        lhs.value < rhs.value
     }
 }
 
@@ -219,4 +219,27 @@ final class ExternallySortedKeySetTests: XCTestCase {
         
         XCTAssertEqual(string, "ABCD")
     }
+    
+    /// Inserting an element with the same ID but sorted differently on the Index will cause it to be inseting twice in the sorted set.
+    func test_sameIdNewSort() {
+        let a1 = Test(id: 1, value: "A")
+        let b2 = Test(id: 2, value: "B")
+        let c3 = Test(id: 3, value: "C")
+        let d4 = Test(id: 4, value: "D")
+        
+        /// Will be sorted at the end. a1 should be removed.
+        let e1 = Test(id: 1, value: "E")
+        
+        let sut = ExternallySortedKeySet<Test>(lessThan: <)
+            .inserting(a1)
+            .inserting(b2)
+            .inserting(c3)
+            .inserting(d4)
+            .inserting(e1)
+        
+        XCTAssertEqual(sut.count, 4)
+        XCTAssertEqual(sut.values[0], b2)
+        XCTAssertEqual(sut.values[3], e1)
+    }
+    
 }

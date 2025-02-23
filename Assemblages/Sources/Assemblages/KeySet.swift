@@ -23,6 +23,8 @@ public struct KeySet<Element: Identifiable> {
     
     public var count: Int { storage.count }
     
+    public var dictionary: [Element.ID: Element] { storage }
+    
     public var values: [Element] {
         return Array(storage.values)
     }

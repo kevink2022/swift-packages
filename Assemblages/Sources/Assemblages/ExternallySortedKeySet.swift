@@ -27,6 +27,7 @@ public struct ExternallySortedKeySet<Element: Identifiable> {
     internal var sorted: IndexSortedSet<Element>
     
     public var count: Int { sorted.count }
+    public var dictionary: [Element.ID: Element] { keyed.dictionary }
     public var values: [Element] { sorted.values }
     
     public subscript(id: Element.ID) -> Element? {
@@ -42,6 +43,10 @@ public struct ExternallySortedKeySet<Element: Identifiable> {
     //}
     
     public mutating func insert(_ element: Element) {
+        if let existing = keyed[element.id] {
+            sorted.remove(existing)
+        }
+        
         keyed.insert(element)
         sorted.insert(element)
     }
