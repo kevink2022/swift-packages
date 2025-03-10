@@ -119,6 +119,12 @@ extension SortedSet where Element: Hashable {
     }
 }
 
+extension SortedSet: Equatable where Element: Equatable {
+    public static func == (lhs: SortedSet, rhs: SortedSet) -> Bool {
+        lhs.storage == rhs.storage
+    }
+}
+
 extension SortedSet: Codable where Element: Codable { }
 extension SortedSet: ArrayMutableCollectionImpl {
     public typealias Element = Element

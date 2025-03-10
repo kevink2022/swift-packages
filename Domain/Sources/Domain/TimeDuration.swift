@@ -24,6 +24,17 @@ extension TimeDuration {
         case weeks
         case months
         case years
+        
+        public var label: String {
+            switch self {
+            case .minutes: "Minutes"
+            case .hours: "Hours"
+            case .days: "Days"
+            case .weeks: "Weeks"
+            case .months: "Months"
+            case .years:  "Years"
+            }
+        }
     }
     
     public var interval: TimeDuration.Interval {

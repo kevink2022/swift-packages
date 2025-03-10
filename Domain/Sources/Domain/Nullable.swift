@@ -36,6 +36,43 @@ extension Optional where Wrapped: Nullable {
             return value
         }
     }
+    
+    public var null: Wrapped {
+        switch self {
+        case .none:
+            return .null
+        case .some(let value):
+            return value
+        }
+    }
+}
+
+extension Optional {
+    
+    /// Shorthand access to `Wrapped` type within closure. Returns nil
+    ///
+    /// Following expressions are equivalent
+    /// - guard let pattern
+    /// ``` swift
+    /// let number: Int?
+    /// let result: String? = {
+    ///     guard let unwrapped = number else { return nil }
+    ///     return String(unwrapped)
+    /// }()
+    /// ```
+    /// - nil or pattern
+    /// ``` swift
+    /// let number: Int?
+    /// let result: number.nilOr({ value in String(value) })
+    /// ```
+    public func nilOr<T>(_ transform: (_ value: Wrapped) -> T?) -> T? {
+        switch self {
+        case .none:
+            return nil
+        case .some(let value):
+            return transform(value)
+        }
+    }
 }
 
 extension Date: Nullable {
