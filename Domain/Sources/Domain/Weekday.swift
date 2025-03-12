@@ -6,15 +6,37 @@
 //
 
 import Foundation
+import SwiftUI
 
-public enum Weekday: String, Codable, CaseIterable {
-    case sunday = "Sunday"
-    case monday = "Monday"
-    case tuesday = "Tuesday"
-    case wednesday = "Wednesday"
-    case thursday = "Thursday"
-    case friday = "Friday"
-    case saturday = "Saturday"
+public enum Weekday: Int, CaseIterable, Codable, Identifiable, Equatable {
+    case sunday = 1
+    case monday = 2
+    case tuesday = 3
+    case wednesday = 4
+    case thursday = 5
+    case friday = 6
+    case saturday = 7
+    
+    public var id: Int { self.rawValue }
+    
+    // Get the current weekday
+    public static var today: Weekday {
+        let calendar = Calendar.current
+        let weekday = calendar.component(.weekday, from: Date())
+        return Weekday(rawValue: weekday) ?? .monday
+    }
+    
+    public var name: String {
+        DateFormatter().weekdaySymbols[self.rawValue - 1]
+    }
+    
+    public var shortName: String {
+        DateFormatter().shortWeekdaySymbols[self.rawValue - 1]
+    }
+    
+    public var veryShortName: String {
+        DateFormatter().veryShortWeekdaySymbols[self.rawValue - 1]
+    }
 }
 
 extension Date {

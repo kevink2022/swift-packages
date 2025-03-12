@@ -64,7 +64,7 @@ public final class Transactor<TransactionData: Codable, Post> {
         , coreCommit: @escaping (TransactionData, Post) async -> (Post)
         , flatten: (([TransactionData]) -> TransactionData)? = nil
     ) {
-        self.storage = LogStore<DataTransaction<TransactionData>>(key: key, inMemory: inMemory)
+        self.storage = LogStore<DataTransaction<TransactionData>>(key: key, namespace: namespace, inMemory: inMemory)
         self.publisher = CurrentValueSubject<Post, Never>(basePost)
         self.coreCommit = coreCommit
         self.queue = AsyncChannel<() async -> ()>()

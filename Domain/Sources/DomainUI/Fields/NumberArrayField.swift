@@ -46,28 +46,26 @@ public struct IntegerArrayField: View {
     @State private var displayIntegers: [Int?]
     
     public var body: some View {
-        VStack {
-            ForEach(displayIntegers.indices, id: \.self) { index in
-                NullNumberField(integer: $displayIntegers[index])
-            }
-            
-            Button {
-                displayIntegers.append(nil)
-            } label: {
-                Text("Add Number")
-            }
-            
-            if !focused && displayIntegers.count != displayIntegers.compactMap({$0}).count {
-                Button {
-                    displayIntegers = displayIntegers.compactMap({$0})
-                } label: {
-                    Text("Flatten")
-                }
-            }
+        ForEach(displayIntegers.indices, id: \.self) { index in
+            NullNumberField(integer: $displayIntegers[index])
         }
         
+        Button {
+            displayIntegers.append(nil)
+        } label: {
+            Text("Add Number")
+        }
+    
         .onChange(of: displayIntegers) { oldValue, newValue in
             integers = newValue.compactMap({$0})
+        }
+        
+        if !focused && displayIntegers.count != displayIntegers.compactMap({$0}).count {
+            Button {
+                displayIntegers = displayIntegers.compactMap({$0})
+            } label: {
+                Text("Flatten")
+            }
         }
     }
     
@@ -83,29 +81,28 @@ public struct DoubleArrayField: View {
     @State private var displayDoubles: [Double?]
     
     public var body: some View {
-        VStack {
-            ForEach(displayDoubles.indices, id: \.self) { index in
-                NullNumberField(double: $displayDoubles[index])
-            }
-            
-            Button {
-                displayDoubles.append(nil)
-            } label: {
-                Text("Add Number")
-            }
-            
-            if !focused && displayDoubles.count != displayDoubles.compactMap({$0}).count {
-                Button {
-                    displayDoubles = displayDoubles.compactMap({$0})
-                } label: {
-                    Text("Flatten")
-                }
-            }
+        ForEach(displayDoubles.indices, id: \.self) { index in
+            NullNumberField(double: $displayDoubles[index])
         }
         
+        Button {
+            displayDoubles.append(nil)
+        } label: {
+            Text("Add Number")
+        }
+    
         .onChange(of: displayDoubles) { oldValue, newValue in
             doubles = newValue.compactMap({$0})
         }
+            
+        if !focused && displayDoubles.count != displayDoubles.compactMap({$0}).count {
+            Button {
+                displayDoubles = displayDoubles.compactMap({$0})
+            } label: {
+                Text("Flatten")
+            }
+        }
+        
     }
     
     public init(doubles: Binding<[Double]>) {

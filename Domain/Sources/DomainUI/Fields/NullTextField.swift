@@ -36,3 +36,41 @@ public struct NullTextField: View {
     private var label: String
     private var prompt: Text?
 }
+
+public struct NullTextEditor: View {
+    
+    @Binding private var string: String?
+    @State private var displayString: String
+       
+    public var body: some View {
+        ZStack(alignment: .leading) {
+            TextEditor(text: $displayString)
+                .keyboardType(.default)
+                .onChange(of: displayString) { oldValue, newValue in
+                    string = newValue.nulled()
+                }
+            
+            if $displayString.wrappedValue.isEmpty, let prompt = prompt {
+                Text(prompt)
+                    .foregroundColor(Color(.placeholderText))
+                //                .padding(.horizontal, 8)
+                //                .padding(.vertical, 8)
+                    .allowsHitTesting(false)
+            }
+        }
+    }
+    
+    public init(
+        text: Binding<String?>
+        , label: String = ""
+        , prompt: String? = nil
+    ) {
+        self._string = text
+        self.displayString = text.wrappedValue.null
+        self.label = label
+        self.prompt = prompt
+    }
+    
+    private var label: String
+    private var prompt: String?
+}
