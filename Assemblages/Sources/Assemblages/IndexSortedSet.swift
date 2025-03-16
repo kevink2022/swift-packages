@@ -50,6 +50,7 @@ public struct IndexSortedSet<Element> {
             , in: storage
             , equalTo: equalTo
             , lessThan: lessThan
+            , option: binarySearchOption
         )
         
         if result.exists {
@@ -65,6 +66,7 @@ public struct IndexSortedSet<Element> {
             , in: storage
             , equalTo: equalTo
             , lessThan: lessThan
+            , option: binarySearchOption
         )
         
         if result.exists {
@@ -100,6 +102,7 @@ public struct IndexSortedSet<Element> {
             , in: storage
             , equalTo: equalTo
             , lessThan: lessThan
+            , option: binarySearchOption
         )
         
         if result.exists {
@@ -126,6 +129,8 @@ public struct IndexSortedSet<Element> {
         }
         return newSet
     }
+    
+    private let binarySearchOption: BinarySearchOption = .last
 }
 
 extension IndexSortedSet where Element: Hashable {

@@ -30,9 +30,11 @@ public struct OrderableList: View {
                 Text("Non-draggable item 2")
             }
         }
+        /*
         .toolbar {
             EditButton()
         }
+        */
     }
     
     public init() {}

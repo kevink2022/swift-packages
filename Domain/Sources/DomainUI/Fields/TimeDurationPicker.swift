@@ -21,7 +21,7 @@ public struct TimeDurationPicker: View {
     public var body: some View {
         HStack {
             TextField("Number of", text: $spacingValueInput)
-                .keyboardType(.numberPad)
+                .domainKeyboardType(.numberPad)
                 .frame(width: 100)
             
             Picker("", selection: $spacingInterval) {

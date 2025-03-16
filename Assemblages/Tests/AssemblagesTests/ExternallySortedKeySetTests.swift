@@ -242,4 +242,26 @@ final class ExternallySortedKeySetTests: XCTestCase {
         XCTAssertEqual(sut.values[3], e1)
     }
     
+    /// Inserting an element with the same sort but sorted new Id should insert a new value, but is currently overwriting the value with the same sort
+    func test_sameSortNewId() {
+        let a1 = Test(id: 1, value: "A")
+        let b2 = Test(id: 2, value: "B")
+        let c3 = Test(id: 3, value: "C")
+        let d4 = Test(id: 4, value: "D")
+        
+        /// Will be abritrarily places within the range of equal sort, but will not remove a1
+        let a5 = Test(id: 5, value: "A")
+        
+        let sut = ExternallySortedKeySet<Test>(lessThan: <)
+            .inserting(a1)
+            .inserting(b2)
+            .inserting(c3)
+            .inserting(d4)
+            .inserting(a5)
+        
+        XCTAssertEqual(sut.count, 5)
+        XCTAssertEqual(sut.values[0], a1)
+        XCTAssertEqual(sut.values[1], a5)
+        XCTAssertEqual(sut.values[2], b2)
+    }
 }

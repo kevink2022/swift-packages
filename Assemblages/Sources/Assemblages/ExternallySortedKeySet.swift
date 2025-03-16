@@ -8,6 +8,8 @@
 import Foundation
 
 /// The `ExternallySortedKeySet` is a `KeySet` that tracks sorting in an external array.
+///
+/// Items that are equal on the sort index, but have different IDs, will both be contained in the set, being placed last in the subset of existing equal sorts.
 public struct ExternallySortedKeySet<Element: Identifiable> {
     
     public init(
@@ -18,7 +20,11 @@ public struct ExternallySortedKeySet<Element: Identifiable> {
         self.keyed = set
         self.sorted = IndexSortedSet(
             lessThan: lessThan
-            , equalTo: equalTo ?? { !lessThan($0, $1) && !lessThan($1, $0) }
+            , equalTo: { lhs, rhs in
+                if lhs.id == rhs.id { return true }
+                else if let equalTo = equalTo { return equalTo(lhs, rhs) }
+                else { return !lessThan(lhs, rhs) && !lessThan(rhs, lhs) }
+            }
             , contentsOf: set.values
         )
     }

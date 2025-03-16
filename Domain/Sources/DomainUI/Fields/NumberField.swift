@@ -15,7 +15,7 @@ public struct NumberField: View {
        
     public var body: some View {
         TextField(label, text: $string, prompt: prompt)
-            .keyboardType(number.keyboardType)
+            .domainKeyboardType(number.keyboardType)
             .onChange(of: string) { oldValue, newValue in
                 switch number {
                 case .integer: integer = Int(newValue) ?? integer
@@ -65,7 +65,7 @@ public struct NumberField: View {
     private enum Number {
         case integer, double
         
-        var keyboardType: UIKeyboardType {
+        var keyboardType: DomainKeyboardType {
             switch self {
             case .integer: .numberPad
             case .double: .decimalPad
@@ -86,7 +86,7 @@ public struct IntegerField: View {
        
     public var body: some View {
         TextField(label, text: $string, prompt: prompt)
-            .keyboardType(.numberPad)
+            .domainKeyboardType(.numberPad)
             .onChange(of: string) { oldValue, newValue in
                 integer = Int(newValue) ?? integer
             }
@@ -115,7 +115,7 @@ public struct DoubleField: View {
     
     public var body: some View {
         TextField(label, text: $string, prompt: prompt)
-            .keyboardType(.decimalPad)
+            .domainKeyboardType(.decimalPad)
             .onChange(of: string) { oldValue, newValue in
                 double = Double(newValue) ?? double
             }

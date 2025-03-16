@@ -15,7 +15,7 @@ public struct NullTextField: View {
        
     public var body: some View {
         TextField(label, text: $displayString, prompt: prompt)
-            .keyboardType(.default)
+            .domainKeyboardType(.default)
             .onChange(of: displayString) { oldValue, newValue in
                 string = newValue.nulled()
             }
@@ -45,16 +45,15 @@ public struct NullTextEditor: View {
     public var body: some View {
         ZStack(alignment: .leading) {
             TextEditor(text: $displayString)
-                .keyboardType(.default)
+                .domainKeyboardType(.default)
                 .onChange(of: displayString) { oldValue, newValue in
                     string = newValue.nulled()
                 }
             
             if $displayString.wrappedValue.isEmpty, let prompt = prompt {
                 Text(prompt)
-                    .foregroundColor(Color(.placeholderText))
-                //                .padding(.horizontal, 8)
-                //                .padding(.vertical, 8)
+//                    .foregroundColor(Color.domain(.placeholder))
+                    .opacity(0.4)
                     .allowsHitTesting(false)
             }
         }

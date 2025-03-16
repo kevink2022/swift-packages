@@ -12,10 +12,11 @@ public struct NullNumberField: View {
     @Binding private var integer: Int?
     @Binding private var double: Double?
     @State private var string: String
+    @FocusState private var focused: Bool
        
     public var body: some View {
         TextField(label, text: $string, prompt: prompt)
-            .keyboardType(.numberPad)
+            .domainKeyboardType(number.keyboardType)
             .onChange(of: string) { oldValue, newValue in
                 switch number {
                 case .integer: integer = Int(newValue)
@@ -68,6 +69,13 @@ public struct NullNumberField: View {
     
     private enum Number {
         case integer, double
+        
+        var keyboardType: DomainKeyboardType {
+            switch self {
+            case .integer: .numberPad
+            case .double: .decimalPad
+            }
+        }
     }
 }
 
@@ -85,7 +93,7 @@ public struct NullIntegerField: View {
        
     public var body: some View {
         TextField(label, text: $string, prompt: prompt)
-            .keyboardType(.numberPad)
+            .domainKeyboardType(.numberPad)
             .onChange(of: string) { oldValue, newValue in
                 integer = Int(newValue)
             }
@@ -117,7 +125,7 @@ public struct NullDoubleField: View {
     
     public var body: some View {
         TextField(label, text: $string, prompt: prompt)
-            .keyboardType(.decimalPad)
+            .domainKeyboardType(.decimalPad)
             .onChange(of: string) { oldValue, newValue in
                 double = Double(newValue)
             }
