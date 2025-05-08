@@ -46,7 +46,7 @@ class SortedArrayTests: XCTestCase {
     
     func testInsertContentsOf() {
         var array = SortedArray<TestElement>()
-        array.insert(contentsOf: [
+        array.insert([
             TestElement(string: "d", version: 1)
             , TestElement(string: "b", version: 1)
             , TestElement(string: "e", version: 1)
@@ -61,14 +61,14 @@ class SortedArrayTests: XCTestCase {
     
     func testMerge() {
         var array1 = SortedArray<TestElement>()
-        array1.insert(contentsOf: [
+        array1.insert([
             TestElement(string: "a", version: 1)
             , TestElement(string: "c", version: 1)
             , TestElement(string: "d", version: 1)
         ])
         
         var array2 = SortedArray<TestElement>()
-        array2.insert(contentsOf: [
+        array2.insert([
             TestElement(string: "a", version: 2)
             , TestElement(string: "b", version: 2)
             , TestElement(string: "d", version: 2)
@@ -122,8 +122,7 @@ class SortedArrayTests: XCTestCase {
             .inserting(TestElement(string: "b", version: 1))
             .inserting(TestElement(string: "c", version: 1))
         
-        var result = ""
-        array.reduce(into: &result) { $0 += $1.string }
+        let result = array.reduce(into: "") { $0 += $1.string }
         
         XCTAssertEqual(result, "abc")
     }

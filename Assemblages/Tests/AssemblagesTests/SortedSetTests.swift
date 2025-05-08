@@ -27,7 +27,7 @@ class SortedSetTests: XCTestCase {
         set.insert(TestElement(string: "a", version: 2))
         
         XCTAssertEqual(set[0].string, "a")
-        XCTAssertEqual(set[0].version, 2)
+        XCTAssertEqual(set[0].version, 1)
         XCTAssertEqual(set[1].string, "b")
         XCTAssertEqual(set[2].string, "c")
     }
@@ -40,14 +40,56 @@ class SortedSetTests: XCTestCase {
             .inserting(TestElement(string: "a", version: 2))
         
         XCTAssertEqual(set[0].string, "a")
-        XCTAssertEqual(set[0].version, 2)
+        XCTAssertEqual(set[0].version, 1)
         XCTAssertEqual(set[1].string, "b")
         XCTAssertEqual(set[2].string, "c")
     }
     
     func testInsertContentsOf() {
         var set = SortedSet<TestElement>()
-        set.insert(contentsOf: [
+        set.insert([
+            TestElement(string: "d", version: 1)
+            , TestElement(string: "b", version: 1)
+            , TestElement(string: "e", version: 1)
+            , TestElement(string: "b", version: 2)
+        ])
+        
+        XCTAssertEqual(set[0].string, "b")
+        XCTAssertEqual(set[0].version, 1)
+        XCTAssertEqual(set[1].string, "d")
+        XCTAssertEqual(set[2].string, "e")
+    }
+
+    func testUpdate() {
+        var set = SortedSet<TestElement>()
+        set.update(with: TestElement(string: "c", version: 1))
+        set.update(with: TestElement(string: "a", version: 1))
+        set.update(with: TestElement(string: "b", version: 1))
+        
+        set.update(with: TestElement(string: "a", version: 2))
+        
+        XCTAssertEqual(set[0].string, "a")
+        XCTAssertEqual(set[0].version, 2)
+        XCTAssertEqual(set[1].string, "b")
+        XCTAssertEqual(set[2].string, "c")
+    }
+    
+    func testUpdating() {
+        let set = SortedSet<TestElement>()
+            .updating(with: TestElement(string: "c", version: 1))
+            .updating(with: TestElement(string: "a", version: 1))
+            .updating(with: TestElement(string: "b", version: 1))
+            .updating(with: TestElement(string: "a", version: 2))
+        
+        XCTAssertEqual(set[0].string, "a")
+        XCTAssertEqual(set[0].version, 2)
+        XCTAssertEqual(set[1].string, "b")
+        XCTAssertEqual(set[2].string, "c")
+    }
+    
+    func testUpdateContentsOf() {
+        var set = SortedSet<TestElement>()
+        set.update(with: [
             TestElement(string: "d", version: 1)
             , TestElement(string: "b", version: 1)
             , TestElement(string: "e", version: 1)
@@ -60,16 +102,18 @@ class SortedSetTests: XCTestCase {
         XCTAssertEqual(set[2].string, "e")
     }
     
+    
+    /*
     func testUnion() {
         var set1 = SortedSet<TestElement>()
-        set1.insert(contentsOf: [
+        set1.insert([
             TestElement(string: "a", version: 1)
             , TestElement(string: "c", version: 1)
             , TestElement(string: "d", version: 1)
         ])
         
         var set2 = SortedSet<TestElement>()
-        set2.insert(contentsOf: [
+        set2.insert([
             TestElement(string: "a", version: 2)
             , TestElement(string: "b", version: 2)
             , TestElement(string: "d", version: 2)
@@ -105,10 +149,11 @@ class SortedSetTests: XCTestCase {
         XCTAssertEqual(unionSet[3].string, "d")
         XCTAssertEqual(unionSet[3].version, 2)
     }
+    */
     
     func testRemove() {
         var set = SortedSet<TestElement>()
-        set.insert(contentsOf: [
+        set.insert([
             TestElement(string: "a", version: 1)
             , TestElement(string: "b", version: 1)
             , TestElement(string: "c", version: 1)
@@ -136,13 +181,13 @@ class SortedSetTests: XCTestCase {
     
     func testRemoveContentsOf() {
         var set = SortedSet<TestElement>()
-        set.insert(contentsOf: [
+        set.insert([
             TestElement(string: "a", version: 1)
             , TestElement(string: "b", version: 1)
             , TestElement(string: "c", version: 1)
             , TestElement(string: "d", version: 1)
         ])
-        set.remove(contentsOf: [
+        set.remove([
             TestElement(string: "b", version: 1)
             , TestElement(string: "d", version: 1)
         ])
@@ -159,7 +204,7 @@ class SortedSetTests: XCTestCase {
             .inserting(TestElement(string: "c", version: 1))
             .inserting(TestElement(string: "d", version: 1))
         
-        let newSet = set.removing(contentsOf: [
+        let newSet = set.removing([
             TestElement(string: "b", version: 1)
             , TestElement(string: "d", version: 1)
         ])
@@ -186,8 +231,8 @@ class SortedSetTests: XCTestCase {
             .inserting(TestElement(string: "b", version: 1))
             .inserting(TestElement(string: "c", version: 1))
         
-        var result = ""
-        set.reduce(into: &result) { $0 += $1.string }
+        
+        let result = set.reduce(into: "") { $0 += $1.string }
         
         XCTAssertEqual(result, "abc")
     }

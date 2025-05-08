@@ -1,5 +1,5 @@
 //
-//  ExternallySortedKeySetTests.swift
+//  IndexSortedKeySetTests.swift
 //  Assemblages
 //
 //  Created by Kevin Kelly on 11/27/24.
@@ -27,13 +27,13 @@ private final class Test: Identifiable, Comparable {
     }
 }
 
-final class ExternallySortedKeySetTests: XCTestCase {
+final class IndexSortedKeySetTests: XCTestCase {
     
     func test_insertAndRemove() {
         let a1 = Test(id: 1, value: "A")
         let b2 = Test(id: 2, value: "B")
         
-        var sut = ExternallySortedKeySet<Test>(lessThan: <)
+        var sut = IndexSortedKeySet<Test>(lessThan: <)
         
         sut.insert(a1)
         sut.insert(b2)
@@ -59,7 +59,7 @@ final class ExternallySortedKeySetTests: XCTestCase {
         let a1 = Test(id: 1, value: "A")
         let b2 = Test(id: 2, value: "B")
         
-        let sut1 = ExternallySortedKeySet<Test>(lessThan: <)
+        let sut1 = IndexSortedKeySet<Test>(lessThan: <)
         
         let sut2 = sut1.inserting(a1)
         let sut3 = sut2.inserting(b2)
@@ -87,13 +87,13 @@ final class ExternallySortedKeySetTests: XCTestCase {
         let c3 = Test(id: 3, value: "C")
         let d4 = Test(id: 4, value: "D")
         
-        var sut = ExternallySortedKeySet<Test>(lessThan: <)
+        var sut = IndexSortedKeySet<Test>(lessThan: <)
         
-        sut.insert(contentsOf: [a1, b2, c3, d4])
+        sut.insert([a1, b2, c3, d4])
         
         XCTAssertEqual(sut.count, 4)
         
-        sut.remove(contentsOf: [b2, d4])
+        sut.remove([b2, d4])
         
         XCTAssertEqual(sut.count, 2)
         XCTAssertEqual(sut.contains(a1), true)
@@ -108,13 +108,13 @@ final class ExternallySortedKeySetTests: XCTestCase {
         let c3 = Test(id: 3, value: "C")
         let d4 = Test(id: 4, value: "D")
         
-        let sut1 = ExternallySortedKeySet<Test>(lessThan: <)
+        let sut1 = IndexSortedKeySet<Test>(lessThan: <)
         
-        let sut2 = sut1.inserting(contentsOf: [a1, b2, c3, d4])
+        let sut2 = sut1.inserting([a1, b2, c3, d4])
         
         XCTAssertEqual(sut2.count, 4)
         
-        let sut3 = sut2.removing(contentsOf: [b2, d4])
+        let sut3 = sut2.removing([b2, d4])
         
         XCTAssertEqual(sut3.count, 2)
         XCTAssertEqual(sut3.contains(a1), true)
@@ -127,7 +127,7 @@ final class ExternallySortedKeySetTests: XCTestCase {
         let a1 = Test(id: 1, value: "A")
         let b1 = Test(id: 1, value: "B")
         
-        var sut = ExternallySortedKeySet<Test>(lessThan: <)
+        var sut = IndexSortedKeySet<Test>(lessThan: <)
         
         sut.insert(a1)
         
@@ -140,12 +140,12 @@ final class ExternallySortedKeySetTests: XCTestCase {
         let a1 = Test(id: 1, value: "A")
         let b2 = Test(id: 2, value: "B")
         
-        let sut1 = ExternallySortedKeySet<Test>(lessThan: <)
+        let sut1 = IndexSortedKeySet<Test>(lessThan: <)
             .inserting(a1)
             .inserting(b2)
         
-        var sut2 = ExternallySortedKeySet<Test>(lessThan: <)
-        sut1.reduce(into: &sut2) { newSet, test in
+        
+        let sut2 = sut1.reduce(into: IndexSortedKeySet<Test>(lessThan: <)) { newSet, test in
             newSet.insert(Test(id: test.id, value: test.value + "2"))
         }
         
@@ -157,11 +157,11 @@ final class ExternallySortedKeySetTests: XCTestCase {
         let a1 = Test(id: 1, value: "A")
         let b2 = Test(id: 2, value: "B")
         
-        let sut1 = ExternallySortedKeySet<Test>(lessThan: <)
+        let sut1 = IndexSortedKeySet<Test>(lessThan: <)
             .inserting(a1)
             .inserting(b2)
         
-        let sut2: ExternallySortedKeySet<Test> = sut1.reduce(ExternallySortedKeySet<Test>(lessThan: <)) { newSet, test in
+        let sut2: IndexSortedKeySet<Test> = sut1.reduce(IndexSortedKeySet<Test>(lessThan: <)) { newSet, test in
             newSet.inserting(Test(id: test.id, value: test.value + "2"))
         }
         
@@ -175,7 +175,7 @@ final class ExternallySortedKeySetTests: XCTestCase {
         let c3 = Test(id: 3, value: "C")
         let d4 = Test(id: 4, value: "D")
         
-        let sut1 = ExternallySortedKeySet<Test>(lessThan: <)
+        let sut1 = IndexSortedKeySet<Test>(lessThan: <)
             .inserting(a1)
             .inserting(b2)
             .inserting(c3)
@@ -201,7 +201,7 @@ final class ExternallySortedKeySetTests: XCTestCase {
         let c3 = Test(id: 3, value: "C")
         let d4 = Test(id: 4, value: "D")
         
-        let sut = ExternallySortedKeySet<Test>(lessThan: <)
+        let sut = IndexSortedKeySet<Test>(lessThan: <)
             .inserting(a1)
             .inserting(b2)
             .inserting(c3)
@@ -221,7 +221,7 @@ final class ExternallySortedKeySetTests: XCTestCase {
     }
     
     /// Inserting an element with the same ID but sorted differently on the Index will cause it to be inseting twice in the sorted set.
-    func test_sameIdNewSort() {
+    func test_sameIdNewSortInsert() {
         let a1 = Test(id: 1, value: "A")
         let b2 = Test(id: 2, value: "B")
         let c3 = Test(id: 3, value: "C")
@@ -230,7 +230,7 @@ final class ExternallySortedKeySetTests: XCTestCase {
         /// Will be sorted at the end. a1 should be removed.
         let e1 = Test(id: 1, value: "E")
         
-        let sut = ExternallySortedKeySet<Test>(lessThan: <)
+        let sut = IndexSortedKeySet<Test>(lessThan: <)
             .inserting(a1)
             .inserting(b2)
             .inserting(c3)
@@ -238,8 +238,34 @@ final class ExternallySortedKeySetTests: XCTestCase {
             .inserting(e1)
         
         XCTAssertEqual(sut.count, 4)
-        XCTAssertEqual(sut.values[0], b2)
-        XCTAssertEqual(sut.values[3], e1)
+        XCTAssertEqual(sut.values[0].id, a1.id)
+        XCTAssertEqual(sut.values[0].value, a1.value)
+        XCTAssertEqual(sut.values[3].id, d4.id)
+        XCTAssertEqual(sut.values[3].value, d4.value)
+    }
+    
+    /// Inserting an element with the same ID but sorted differently on the Index will cause it to be inseting twice in the sorted set.
+    func test_sameIdNewSortUpdate() {
+        let a1 = Test(id: 1, value: "A")
+        let b2 = Test(id: 2, value: "B")
+        let c3 = Test(id: 3, value: "C")
+        let d4 = Test(id: 4, value: "D")
+        
+        /// Will be sorted at the end. a1 should be removed.
+        let e1 = Test(id: 1, value: "E")
+        
+        let sut = IndexSortedKeySet<Test>(lessThan: <)
+            .updating(with: a1)
+            .updating(with: b2)
+            .updating(with: c3)
+            .updating(with: d4)
+            .updating(with: e1)
+        
+        XCTAssertEqual(sut.count, 4)
+        XCTAssertEqual(sut.values[0].id, b2.id)
+        XCTAssertEqual(sut.values[0].value, b2.value)
+        XCTAssertEqual(sut.values[3].id, e1.id)
+        XCTAssertEqual(sut.values[3].value, e1.value)
     }
     
     /// Inserting an element with the same sort but sorted new Id should insert a new value, but is currently overwriting the value with the same sort
@@ -252,7 +278,7 @@ final class ExternallySortedKeySetTests: XCTestCase {
         /// Will be abritrarily places within the range of equal sort, but will not remove a1
         let a5 = Test(id: 5, value: "A")
         
-        let sut = ExternallySortedKeySet<Test>(lessThan: <)
+        let sut = IndexSortedKeySet<Test>(lessThan: <)
             .inserting(a1)
             .inserting(b2)
             .inserting(c3)
@@ -260,8 +286,14 @@ final class ExternallySortedKeySetTests: XCTestCase {
             .inserting(a5)
         
         XCTAssertEqual(sut.count, 5)
-        XCTAssertEqual(sut.values[0], a1)
-        XCTAssertEqual(sut.values[1], a5)
         XCTAssertEqual(sut.values[2], b2)
+        
+        if sut.values[0] == a1 {
+            XCTAssertEqual(sut.values[1], a5)
+        }
+        else {
+            XCTAssertEqual(sut.values[0], a5)
+            XCTAssertEqual(sut.values[1], a1)
+        }
     }
 }

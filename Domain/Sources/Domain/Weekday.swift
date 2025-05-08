@@ -47,4 +47,10 @@ extension Date {
     public var startOfDay: Date {
         Calendar.current.startOfDay(for: self)
     }
+    
+    public var weekday: Weekday {
+        let calendar = Calendar.current
+        let weekdayComponent = calendar.component(.weekday, from: self)
+        return Weekday(rawValue: weekdayComponent) ?? .monday
+    }
 }

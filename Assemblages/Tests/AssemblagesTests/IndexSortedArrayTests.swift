@@ -14,7 +14,7 @@ fileprivate struct TestElement {
 class IndexSortedArrayTests: XCTestCase {
     
     func testInsert() {
-        var array = IndexSortedArray<TestElement>(lessThan: TestElement.lessThan)
+        var array = SortedArrayIndex<TestElement>(lessThan: TestElement.lessThan)
         array.insert(TestElement(string: "c", version: 1))
         array.insert(TestElement(string: "a", version: 1))
         array.insert(TestElement(string: "b", version: 1))
@@ -28,7 +28,7 @@ class IndexSortedArrayTests: XCTestCase {
     }
     
     func testInserting() {
-        let array = IndexSortedArray<TestElement>(lessThan: TestElement.lessThan)
+        let array = SortedArrayIndex<TestElement>(lessThan: TestElement.lessThan)
             .inserting(TestElement(string: "c", version: 1))
             .inserting(TestElement(string: "a", version: 1))
             .inserting(TestElement(string: "b", version: 1))
@@ -41,8 +41,8 @@ class IndexSortedArrayTests: XCTestCase {
     }
     
     func testInsertContentsOf() {
-        var array = IndexSortedArray<TestElement>(lessThan: TestElement.lessThan)
-        array.insert(contentsOf: [
+        var array = SortedArrayIndex<TestElement>(lessThan: TestElement.lessThan)
+        array.insert([
             TestElement(string: "d", version: 1)
             , TestElement(string: "b", version: 1)
             , TestElement(string: "e", version: 1)
@@ -56,7 +56,7 @@ class IndexSortedArrayTests: XCTestCase {
     }
     
     func testReduce() {
-        let array = IndexSortedArray<TestElement>(lessThan: TestElement.lessThan)
+        let array = SortedArrayIndex<TestElement>(lessThan: TestElement.lessThan)
             .inserting(TestElement(string: "a", version: 1))
             .inserting(TestElement(string: "b", version: 1))
             .inserting(TestElement(string: "c", version: 1))
@@ -67,19 +67,18 @@ class IndexSortedArrayTests: XCTestCase {
     }
     
     func testReduceInto() {
-        let array = IndexSortedArray<TestElement>(lessThan: TestElement.lessThan)
+        let array = SortedArrayIndex<TestElement>(lessThan: TestElement.lessThan)
             .inserting(TestElement(string: "a", version: 1))
             .inserting(TestElement(string: "b", version: 1))
             .inserting(TestElement(string: "c", version: 1))
         
-        var result = ""
-        array.reduce(into: &result) { $0 += $1.string }
+        let result = array.reduce(into: "") { $0 += $1.string }
         
         XCTAssertEqual(result, "abc")
     }
     
     func testFilter() {
-        let array = IndexSortedArray<TestElement>(lessThan: TestElement.lessThan)
+        let array = SortedArrayIndex<TestElement>(lessThan: TestElement.lessThan)
             .inserting(TestElement(string: "a", version: 1))
             .inserting(TestElement(string: "b", version: 1))
             .inserting(TestElement(string: "c", version: 1))
@@ -92,7 +91,7 @@ class IndexSortedArrayTests: XCTestCase {
     }
     
     func testForEach() {
-        let array = IndexSortedArray<TestElement>(lessThan: TestElement.lessThan)
+        let array = SortedArrayIndex<TestElement>(lessThan: TestElement.lessThan)
             .inserting(TestElement(string: "a", version: 1))
             .inserting(TestElement(string: "b", version: 1))
             .inserting(TestElement(string: "c", version: 1))
@@ -104,7 +103,7 @@ class IndexSortedArrayTests: XCTestCase {
     }
     
     func testMap() {
-        let array = IndexSortedArray<TestElement>(lessThan: TestElement.lessThan)
+        let array = SortedArrayIndex<TestElement>(lessThan: TestElement.lessThan)
             .inserting(TestElement(string: "a", version: 1))
             .inserting(TestElement(string: "b", version: 1))
             .inserting(TestElement(string: "c", version: 1))
@@ -115,7 +114,7 @@ class IndexSortedArrayTests: XCTestCase {
     }
     
     func testCompactMap() {
-        let array = IndexSortedArray<TestElement>(lessThan: TestElement.lessThan)
+        let array = SortedArrayIndex<TestElement>(lessThan: TestElement.lessThan)
             .inserting(TestElement(string: "a", version: 1))
             .inserting(TestElement(string: "b", version: 1))
             .inserting(TestElement(string: "c", version: 1))

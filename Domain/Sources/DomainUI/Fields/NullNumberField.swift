@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+
 public struct NullNumberField: View {
     
     @Binding private var integer: Int?
@@ -17,11 +18,20 @@ public struct NullNumberField: View {
     public var body: some View {
         TextField(label, text: $string, prompt: prompt)
             .domainKeyboardType(number.keyboardType)
-            .onChange(of: string) { oldValue, newValue in
+            .onChange(of: string) { _, newValue in
                 switch number {
                 case .integer: integer = Int(newValue)
                 case .double: double = Double(newValue)
                 }
+            }
+        
+            .onChange(of: integer) { _, newValue in
+                guard let newValue = newValue else { return }
+                string = String(newValue)
+            }
+            .onChange(of: double) { _, newValue in
+                guard let newValue = newValue else { return }
+                string = String(newValue)
             }
     }
     

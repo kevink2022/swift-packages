@@ -78,11 +78,11 @@ final class KeySetTests: XCTestCase {
         
         var sut = KeySet<Test>()
         
-        sut.insert(contentsOf: [a1, b2, c3, d4])
+        sut.insert([a1, b2, c3, d4])
         
         XCTAssertEqual(sut.count, 4)
         
-        sut.remove(contentsOf: [b2, d4])
+        sut.remove([b2, d4])
         
         XCTAssertEqual(sut.count, 2)
         XCTAssertEqual(sut.contains(a1), true)
@@ -99,11 +99,11 @@ final class KeySetTests: XCTestCase {
         
         let sut1 = KeySet<Test>()
         
-        let sut2 = sut1.inserting(contentsOf: [a1, b2, c3, d4])
+        let sut2 = sut1.inserting([a1, b2, c3, d4])
         
         XCTAssertEqual(sut2.count, 4)
         
-        let sut3 = sut2.removing(contentsOf: [b2, d4])
+        let sut3 = sut2.removing([b2, d4])
         
         XCTAssertEqual(sut3.count, 2)
         XCTAssertEqual(sut3.contains(a1), true)
@@ -133,8 +133,8 @@ final class KeySetTests: XCTestCase {
             .inserting(a1)
             .inserting(b2)
         
-        var sut2 = KeySet<Test>()
-        sut1.reduce(into: &sut2) { newSet, test in
+        
+        let sut2 = sut1.reduce(into: KeySet<Test>()) { newSet, test in
             newSet.insert(Test(id: test.id, value: test.value + "2"))
         }
         

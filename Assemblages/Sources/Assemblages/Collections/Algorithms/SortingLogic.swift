@@ -7,15 +7,15 @@
 
 import Foundation
 
-/// In a binary search that encounters duplicates, specificy whether any index is acceptable, or the first/last index of the duplicates is required.
-internal enum BinarySearchOption {
+/// In a sorted list that can contain duplicates, specificy whether any index is acceptable, or the first/last index of the duplicates is required.
+public enum DuplicateInsertSortingOption: Codable {
     case any, first, last
 }
 
 internal class SortingLogic {
     
     /// Binary search. Assumes that the array is sorted
-    public static func binarySearch<T: Comparable>(for element: T, in storage: [T], option: BinarySearchOption = .any) -> (index: Int, exists: Bool) {
+    public static func binarySearch<T: Comparable>(for element: T, in storage: [T], option: DuplicateInsertSortingOption = .any) -> (index: Int, exists: Bool) {
 
         return SortingLogic.binarySearch(
             for: element
@@ -31,7 +31,7 @@ internal class SortingLogic {
         , in storage: [T]
         , equalTo: (T, T) -> Bool
         , lessThan: (T, T) -> Bool
-        , option: BinarySearchOption = .any
+        , option: DuplicateInsertSortingOption = .any
     ) -> (index: Int, exists: Bool) {
         
         var low = 0
@@ -43,9 +43,16 @@ internal class SortingLogic {
                 switch option {
                 case .any:
                     return (mid, true)
+                    
                 case .first:
+                    if mid == 0 { return (mid, true) }
+                    else if !equalTo(storage[mid - 1], element) { return (mid, true) }
+                    
                     high = mid - 1
                 case .last:
+                    if mid == (storage.count - 1) { return (mid, true) }
+                    else if !equalTo(storage[mid + 1], element) { return (mid, true) }
+                    
                     low = mid + 1
                 }
             }
@@ -60,16 +67,6 @@ internal class SortingLogic {
         }
         return (low, false)
     }
-    
-//    /// Merges two sorrted arrays. If two elements are eequalm only the new one is added, overwiritng the old value.
-//    public static func overwriteMerge<T: Comparable>(_ newSet: [T], into oldSet: [T]) -> [T] {
-//        return SortingLogic.internalMerge(newSet, into: oldSet, overwrite: true)
-//    }
-//    
-//    /// Merges two sorrted arrays, keeping all values from each array.
-//    public static func merge<T: Comparable>(_ newSet: [T], into oldSet: [T]) -> [T] {
-//        return SortingLogic.internalMerge(newSet, into: oldSet, overwrite: false)
-//    }
     
     public static func merge<T: Comparable>(_ newSet: [T], into oldSet: [T], overwrite: Bool) -> [T] {
         return SortingLogic.merge(
