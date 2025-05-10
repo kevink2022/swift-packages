@@ -5,53 +5,77 @@
 //  Created by Kevin Kelly on 4/7/25.
 //
 
+/// https://faqs.ankiweb.net/what-spaced-repetition-algorithm.html
+/// https://borretti.me/article/implementing-fsrs-in-100-lines
+/// https://open-spaced-repetition.github.io/anki_fsrs_visualizer/
+
 import Foundation
+
+extension AnkiFSRS_5: SpacedRepititionAlgorithm {
+    public typealias StepContext = (
+        state: AnkiFSRS_5.State?
+        , grade: AnkiSRS.Grade
+    )
+    public typealias NewContext = AnkiFSRS_5.State
+    
+    public static func nextReview(from date: Date, context: StepContext) -> (Date, NewContext) {
+        AnkiFSRS_5(grade: context.grade, state: context.state).nextReview(from: date)
+    }
+}
 
 public final class AnkiFSRS_5 {
     
     // MARK: - Parameters
+    public let grade: AnkiSRS.Grade
+    public let state: AnkiFSRS_5.State?
     public let desiredRetention: Double
     public var parameters: AnkiFSRS_5.Parameters { storedParameters ?? .standard }
     
     internal let storedParameters: AnkiFSRS_5.Parameters?
-    internal let curveMod_f: Double = 19/81
-    internal let curveMod_c: Double = -0.5
+    internal static let curveMod_f: Double = 19/81
+    internal static let curveMod_c: Double = -0.5
     
     public init(
-        desiredRetention: Double = 0.9
+        grade: AnkiSRS.Grade
+        , state: AnkiFSRS_5.State?
+        , desiredRetention: Double = 0.9
         , parameters: AnkiFSRS_5.Parameters? = nil
     ) {
+        self.grade = grade
+        self.state = state
         self.desiredRetention = desiredRetention
         self.storedParameters = parameters
     }
-    /*
-    public func nextReview(daysSinceLastReview: Double, grade: AnkiFSRS_5.Grade, state: AnkiFSRS_5.State?) -> (nextReview: Double, newState: AnkiFSRS_5.State) {
-        guard let state = state else {
-            
-            
-            let initialState = AnkiFSRS_5.State(
-                difficulty: initialDifficulty(grade: grade),
-                stability: initialStability(grade: grade),
-                retrievability: retrievability(daysSinceLastReview: <#T##Double#>, state: <#T##State#>)
-            )
-            
-        }
-        let newState = AnkiFSRS_5.State(
-            difficulty: <#T##Double#>
-            , stability: <#T##Double#>
-            , retrievability: <#T##Double#>
-        )
-    }
-    */
-    internal func retrievability(daysSinceLastReview: Double, state: AnkiFSRS_5.State) -> Double {
-        pow((1.0 + curveMod_f * (daysSinceLastReview / state.stability)), curveMod_c)
+    
+    public func nextReview(from date: Date) -> (nextReview: Date, newState: AnkiFSRS_5.State) {
+                        
+        let newState = {
+            if let beforeState = state {
+                AnkiFSRS_5.State(
+                    difficulty: nextDifficulty(state: beforeState)
+                    , stability: nextStability(from: date, state: beforeState)
+                    , lastReviewed: date
+                )
+            } else {
+                AnkiFSRS_5.State(
+                    difficulty: initialDifficulty(),
+                    stability: initialStability(),
+                    lastReviewed: date
+                )
+            }
+        }()
+        
+        let nextReviewInterval = reviewInterval(state: newState)
+        let nextReview = date.adding(.days(Int(nextReviewInterval))) ?? date
+        
+        return (nextReview, newState)
     }
     
     internal func reviewInterval(state: AnkiFSRS_5.State) -> Double {
-        (state.stability / curveMod_f) * (pow(desiredRetention, 1/curveMod_c) - 1)
+        (state.stability / AnkiFSRS_5.curveMod_f) * (pow(desiredRetention, 1/AnkiFSRS_5.curveMod_c) - 1)
     }
     
-    internal func initialStability(grade: AnkiFSRS_5.Grade) -> Double {
+    internal func initialStability() -> Double {
         let params = parameters.initial.stability
         
         return switch grade {
@@ -62,18 +86,18 @@ public final class AnkiFSRS_5 {
         }
     }
     
-    internal func nextStability(grade: AnkiFSRS_5.Grade, state: AnkiFSRS_5.State) -> Double {
+    internal func nextStability(from reviewDate: Date, state: AnkiFSRS_5.State) -> Double {
         let nextStability = grade.isSuccess ? nextStabilityOnSuccess : nextStabilityOnFailure
-        return nextStability(grade, state)
+        return nextStability(reviewDate, state)
     }
     
-    internal func nextStabilityOnSuccess(grade: AnkiFSRS_5.Grade, state: AnkiFSRS_5.State) -> Double {
+    internal func nextStabilityOnSuccess(from reviewDate: Date, state: AnkiFSRS_5.State) -> Double {
         let successParams = parameters.stability.success
         let multiplierParams = parameters.stability.multiplier
         
         let difficultyPenalty = 11 - state.difficulty
         let stabilityModifier = pow(state.stability, -successParams.stabilityModifier)
-        let retrievabilitySaturation = pow(M_E, successParams.retrievabilitySaturation * (1 - state.retrievability)) - 1
+        let retrievabilitySaturation = pow(M_E, successParams.retrievabilitySaturation * (1 - state.retrievability(from: reviewDate))) - 1
         let hardPenalty = grade == .hard ? multiplierParams.hard : 1
         let easyBonus = grade == .easy ? multiplierParams.easy : 1
         
@@ -87,17 +111,19 @@ public final class AnkiFSRS_5 {
         ))
     }
     
-    internal func nextStabilityOnFailure(grade: AnkiFSRS_5.Grade, state: AnkiFSRS_5.State) -> Double {
+    internal func nextStabilityOnFailure(from reviewDate: Date, state: AnkiFSRS_5.State) -> Double {
         let failParams = parameters.stability.fail
         
         let difficultyModifier = pow(state.difficulty, -failParams.difficultyModifier)
         let stabilityModifier = pow((state.stability + 1), failParams.stabilityModifier) - 1
-        let retrievabilityModifier = pow(M_E, failParams.retrievabilityModifier * (1 - state.retrievability))
+        let retrievabilityModifier = pow(M_E, failParams.retrievabilityModifier * (1 - state.retrievability(from: reviewDate)))
                 
         return difficultyModifier * stabilityModifier * retrievabilityModifier * failParams.multiplier
     }
     
-    internal func initialDifficulty(grade: AnkiFSRS_5.Grade) -> Double {
+    internal func initialDifficulty(grade: AnkiSRS.Grade? = nil) -> Double {
+        let grade = grade ?? self.grade
+        
         let params = parameters.initial.difficulty
         
         let difficulty = params.good - pow(M_E, params.multiplier * (grade.value)) + 1
@@ -112,16 +138,16 @@ public final class AnkiFSRS_5 {
         return cappedDifficulty
     }
     
-    internal func nextDifficulty(grade: AnkiFSRS_5.Grade, state: AnkiFSRS_5.State) -> Double {
+    internal func nextDifficulty(state: AnkiFSRS_5.State) -> Double {
         let multiplier = parameters.difficulty.multiplier
-        return multiplier * initialDifficulty(grade: .good) + (1 - multiplier) * difficultySlope(grade: grade, state: state)
+        return multiplier * initialDifficulty(grade: .good) + (1 - multiplier) * difficultySlope(state: state)
     }
     
-    internal func difficultySlope(grade: AnkiFSRS_5.Grade, state: AnkiFSRS_5.State) -> Double {
-        state.difficulty + difficultyDelta(grade: grade) * ((10 - state.difficulty) - 9)
+    internal func difficultySlope(state: AnkiFSRS_5.State) -> Double {
+        state.difficulty + difficultyDelta() * ((10 - state.difficulty) - 9)
     }
     
-    internal func difficultyDelta(grade: AnkiFSRS_5.Grade) -> Double {
+    internal func difficultyDelta() -> Double {
         return -parameters.difficulty.deltaMultiplier * (grade.value - 3)
     }
 }
@@ -131,30 +157,26 @@ extension AnkiFSRS_5 {
     public struct State {
         public let difficulty: Double
         public let stability: Double
-        public let retrievability: Double
+        public let lastReviewed: Date
         
         public init(
             difficulty: Double
             , stability: Double
-            , retrievability: Double
+            , lastReviewed: Date
         ) {
             self.difficulty = difficulty
             self.stability = stability
-            self.retrievability = retrievability
+            self.lastReviewed = lastReviewed
         }
-    }
-}
-
-// MARK: - Grade
-extension AnkiFSRS_5 {
-    public enum Grade: Int, CaseIterable {
-        case forgot = 1
-        case hard = 2
-        case good = 3
-        case easy = 4
         
-        public var value: Double { Double(self.rawValue) }
-        public var isSuccess: Bool { self != .forgot }
+        internal func retrievability(from date: Date) -> Double {
+            let lastReviewInterval = date.timeIntervalSince(self.lastReviewed) / 86400
+            return retrievability(interval: lastReviewInterval, state: self)
+        }
+        
+        internal func retrievability(interval: Double, state: AnkiFSRS_5.State) -> Double {
+            pow((1.0 + AnkiFSRS_5.curveMod_f * (interval / state.stability)), AnkiFSRS_5.curveMod_c)
+        }
     }
 }
 

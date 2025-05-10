@@ -9,8 +9,6 @@ import Foundation
 
 /// https://github.com/open-spaced-repetition
 /// https://expertium.github.io/
-/// https://borretti.me/article/implementing-fsrs-in-100-lines
-/// https://open-spaced-repetition.github.io/anki_fsrs_visualizer/
 /// https://github.com/duolingo/halflife-regression
 /// https://nothinghuman.substack.com/p/the-tyranny-of-the-marginal-user
 /// https://www.youtube.com/watch?v=Anc2_mnb3V8 how neural networks learn
@@ -19,8 +17,32 @@ import Foundation
 /// 
 
 
-protocol SpacedRepititionAlgorithm {
+public protocol SpacedRepititionAlgorithm {
     associatedtype StepContext
+    associatedtype NewContext
     
-    func nextDate(base: Date, context: StepContext) -> Date
+    static func nextReview(from: Date, context: StepContext) -> (Date, NewContext)
+}
+
+
+public final class LinearSpacedRepitition: SpacedRepititionAlgorithm {
+    public typealias StepContext = TimeDuration
+    public typealias NewContext = TimeDuration
+    
+    public static func nextReview(from date: Date, context duration: TimeDuration) -> (Date, TimeDuration) {
+        let nextDate = date.adding(duration) ?? date
+        return (nextDate, duration)
+    }
+}
+
+public final class AnkiSRS {
+    public enum Grade: Int, CaseIterable {
+        case forgot = 1
+        case hard = 2
+        case good = 3
+        case easy = 4
+        
+        public var value: Double { Double(self.rawValue) }
+        public var isSuccess: Bool { self != .forgot }
+    }
 }
