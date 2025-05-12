@@ -7,18 +7,9 @@
 
 import Foundation
 
-extension LeitnerBox: SpacedRepititionAlgorithm {
-    public typealias StepContext = (level: Int?, correct: Bool)
-    public typealias NewContext = Int
+public final class LeitnerBox: Codable {
     
-    public static func nextReview(from date: Date, context: StepContext) -> (Date, NewContext) {
-        LeitnerBox.nextReview(from: date, correct: context.correct, on: context.level)
-    }
-}
-
-public final class LeitnerBox {
-    
-    static func nextReview(from date: Date, correct: Bool, on level: Int? = nil) -> (nextReview: Date, newLevel: Int) {
+    static func nextReview(from date: Date, correct: Bool, level: Int? = nil) -> (nextReview: Date, newLevel: Int) {
         
         let newLevel = {
             if correct { (level ?? 1) + 1 }
@@ -31,4 +22,31 @@ public final class LeitnerBox {
         
         return (nextReview, newInterval)
     }
+}
+
+extension LeitnerBox {
+    public struct State: Codable {
+        /// Boolean representing whether the card was correctly answered
+        public let level: Int
+    }
+    
+    public struct Review: Codable {
+        /// Boolean representing whether the card was correctly answered
+        public let correct: Bool
+        /// The date of the review
+        public let date: Date
+    }
+}
+
+extension LeitnerBox: SpacedRepititionAlgorithm {
+    public typealias StateContext = LeitnerBox.State
+    public typealias ReviewContext = LeitnerBox.Review
+    
+    public func nextReview(state: StateContext?, review: ReviewContext) -> (nextReview: Date, newState: StateContext) {
+        let (nextReview, newLevel) = LeitnerBox.nextReview(from: review.date, correct: review.correct, level: state?.level)
+        
+        return (nextReview, LeitnerBox.State(level: newLevel))
+    }
+    
+    public var code: SpacedRepititionType { .leitnerBox(self) }
 }

@@ -11,55 +11,46 @@
 
 import Foundation
 
-extension AnkiFSRS_5: SpacedRepititionAlgorithm {
-    public typealias StepContext = (
-        state: AnkiFSRS_5.State?
-        , grade: AnkiSRS.Grade
-    )
-    public typealias NewContext = AnkiFSRS_5.State
-    
-    public static func nextReview(from date: Date, context: StepContext) -> (Date, NewContext) {
-        AnkiFSRS_5(grade: context.grade, state: context.state).nextReview(from: date)
-    }
-}
-
-public final class AnkiFSRS_5 {
+public final class AnkiFSRS_5: Codable {
     
     // MARK: - Parameters
+    /*
     public let grade: AnkiSRS.Grade
     public let state: AnkiFSRS_5.State?
-    public let desiredRetention: Double
+     */
+    public var desiredRetention: Double { storedDesiredRetention ?? Self.standardDesiredRetention }
     public var parameters: AnkiFSRS_5.Parameters { storedParameters ?? .standard }
     
+    public let storedDesiredRetention: Double?
+    internal static let standardDesiredRetention = 0.9
+
     internal let storedParameters: AnkiFSRS_5.Parameters?
+
+
     internal static let curveMod_f: Double = 19/81
     internal static let curveMod_c: Double = -0.5
     
     public init(
-        grade: AnkiSRS.Grade
-        , state: AnkiFSRS_5.State?
-        , desiredRetention: Double = 0.9
+        desiredRetention: Double = 0.9
         , parameters: AnkiFSRS_5.Parameters? = nil
     ) {
-        self.grade = grade
-        self.state = state
-        self.desiredRetention = desiredRetention
+        self.storedDesiredRetention = desiredRetention
         self.storedParameters = parameters
     }
     
-    public func nextReview(from date: Date) -> (nextReview: Date, newState: AnkiFSRS_5.State) {
+    public func nextReview(from date: Date, state: AnkiFSRS_5.State?, grade: AnkiSRS.Grade) -> (nextReview: Date, newState: AnkiFSRS_5.State) {
                         
         let newState = {
             if let beforeState = state {
                 AnkiFSRS_5.State(
-                    difficulty: nextDifficulty(state: beforeState)
-                    , stability: nextStability(from: date, state: beforeState)
+                    difficulty: nextDifficulty(state: beforeState, grade: grade)
+                    , stability: nextStability(from: date, state: beforeState, grade: grade)
                     , lastReviewed: date
                 )
             } else {
                 AnkiFSRS_5.State(
-                    difficulty: initialDifficulty(),
-                    stability: initialStability(),
+                    difficulty: initialDifficulty(grade: grade),
+                    stability: initialStability(grade: grade),
                     lastReviewed: date
                 )
             }
@@ -75,7 +66,7 @@ public final class AnkiFSRS_5 {
         (state.stability / AnkiFSRS_5.curveMod_f) * (pow(desiredRetention, 1/AnkiFSRS_5.curveMod_c) - 1)
     }
     
-    internal func initialStability() -> Double {
+    internal func initialStability(grade: AnkiSRS.Grade) -> Double {
         let params = parameters.initial.stability
         
         return switch grade {
@@ -86,12 +77,12 @@ public final class AnkiFSRS_5 {
         }
     }
     
-    internal func nextStability(from reviewDate: Date, state: AnkiFSRS_5.State) -> Double {
+    internal func nextStability(from reviewDate: Date, state: AnkiFSRS_5.State, grade: AnkiSRS.Grade) -> Double {
         let nextStability = grade.isSuccess ? nextStabilityOnSuccess : nextStabilityOnFailure
-        return nextStability(reviewDate, state)
+        return nextStability(reviewDate, state, grade)
     }
     
-    internal func nextStabilityOnSuccess(from reviewDate: Date, state: AnkiFSRS_5.State) -> Double {
+    internal func nextStabilityOnSuccess(from reviewDate: Date, state: AnkiFSRS_5.State, grade: AnkiSRS.Grade) -> Double {
         let successParams = parameters.stability.success
         let multiplierParams = parameters.stability.multiplier
         
@@ -111,7 +102,7 @@ public final class AnkiFSRS_5 {
         ))
     }
     
-    internal func nextStabilityOnFailure(from reviewDate: Date, state: AnkiFSRS_5.State) -> Double {
+    internal func nextStabilityOnFailure(from reviewDate: Date, state: AnkiFSRS_5.State, grade: AnkiSRS.Grade) -> Double {
         let failParams = parameters.stability.fail
         
         let difficultyModifier = pow(state.difficulty, -failParams.difficultyModifier)
@@ -121,9 +112,7 @@ public final class AnkiFSRS_5 {
         return difficultyModifier * stabilityModifier * retrievabilityModifier * failParams.multiplier
     }
     
-    internal func initialDifficulty(grade: AnkiSRS.Grade? = nil) -> Double {
-        let grade = grade ?? self.grade
-        
+    internal func initialDifficulty(grade: AnkiSRS.Grade) -> Double {
         let params = parameters.initial.difficulty
         
         let difficulty = params.good - pow(M_E, params.multiplier * (grade.value)) + 1
@@ -138,23 +127,23 @@ public final class AnkiFSRS_5 {
         return cappedDifficulty
     }
     
-    internal func nextDifficulty(state: AnkiFSRS_5.State) -> Double {
+    internal func nextDifficulty(state: AnkiFSRS_5.State, grade: AnkiSRS.Grade) -> Double {
         let multiplier = parameters.difficulty.multiplier
-        return multiplier * initialDifficulty(grade: .good) + (1 - multiplier) * difficultySlope(state: state)
+        return multiplier * initialDifficulty(grade: .good) + (1 - multiplier) * difficultySlope(state: state, grade: grade)
     }
     
-    internal func difficultySlope(state: AnkiFSRS_5.State) -> Double {
-        state.difficulty + difficultyDelta() * ((10 - state.difficulty) - 9)
+    internal func difficultySlope(state: AnkiFSRS_5.State, grade: AnkiSRS.Grade) -> Double {
+        state.difficulty + difficultyDelta(grade: grade) * ((10 - state.difficulty) - 9)
     }
     
-    internal func difficultyDelta() -> Double {
+    internal func difficultyDelta(grade: AnkiSRS.Grade) -> Double {
         return -parameters.difficulty.deltaMultiplier * (grade.value - 3)
     }
 }
 
 // MARK: - State
 extension AnkiFSRS_5 {
-    public struct State {
+    public struct State: Codable {
         public let difficulty: Double
         public let stability: Double
         public let lastReviewed: Date
@@ -182,7 +171,7 @@ extension AnkiFSRS_5 {
 
 // MARK: - Parameters
 extension AnkiFSRS_5 {
-    public struct Parameters {
+    public struct Parameters: Codable {
         public let initial: Initial
         public let difficulty: Difficulty
         public let stability: Stability
@@ -227,7 +216,7 @@ extension AnkiFSRS_5 {
             self.stability = Stability(parameters: Array(parameters[8...18]))
         }
         
-        public struct Initial {
+        public struct Initial: Codable {
             public let stability: Stability
             public let difficulty: Difficulty
             
@@ -253,7 +242,7 @@ extension AnkiFSRS_5 {
                 self.difficulty = Difficulty(parameters: Array(parameters[4...5]))
             }
             
-            public struct Stability {
+            public struct Stability: Codable {
                 public let forgot: Double // w0
                 public let hard: Double // w1
                 public let good: Double // w2
@@ -285,7 +274,7 @@ extension AnkiFSRS_5 {
                 }
             }
             
-            public struct Difficulty {
+            public struct Difficulty: Codable {
                 public let good: Double // w4
                 public let multiplier: Double // w5
                 
@@ -310,7 +299,7 @@ extension AnkiFSRS_5 {
             }
         }
         
-        public struct Difficulty {
+        public struct Difficulty: Codable {
             public let deltaMultiplier: Double // w6
             public let multiplier: Double // w7
             
@@ -337,7 +326,7 @@ extension AnkiFSRS_5 {
             }
         }
         
-        public struct Stability {
+        public struct Stability: Codable {
             public let success: Success
             public let fail: Fail
             public let multiplier: Multiplier
@@ -371,7 +360,7 @@ extension AnkiFSRS_5 {
                 self.shortTerm = ShortTerm(parameters: Array(parameters[9...10]))
             }
             
-            public struct Success {
+            public struct Success: Codable {
                 public let exponent: Double // w8
                 public let stabilityModifier: Double // w9
                 public let retrievabilitySaturation: Double // w10
@@ -399,7 +388,7 @@ extension AnkiFSRS_5 {
                 }
             }
             
-            public struct Fail {
+            public struct Fail: Codable {
                 public let multiplier: Double // w11
                 public let difficultyModifier: Double // w12
                 public let stabilityModifier: Double // w13
@@ -436,7 +425,7 @@ extension AnkiFSRS_5 {
                 }
             }
             
-            public struct Multiplier {
+            public struct Multiplier: Codable {
                 public let hard: Double // w15
                 public let easy: Double // w16
                 
@@ -460,7 +449,7 @@ extension AnkiFSRS_5 {
                 }
             }
             
-            public struct ShortTerm {
+            public struct ShortTerm: Codable {
                 public let exponent: Double // w17
                 public let exponent2: Double // w18
                  
@@ -487,4 +476,22 @@ extension AnkiFSRS_5 {
     }
 }
 
+// MARK: - Contexts
+extension AnkiFSRS_5 {
+    public struct Review: Codable {
+        public let grade: AnkiSRS.Grade
+        public let date: Date
+    }
+}
 
+// MARK: - Conformance
+extension AnkiFSRS_5: SpacedRepititionAlgorithm {
+    public typealias StateContext = AnkiFSRS_5.State
+    public typealias ReviewContext = AnkiFSRS_5.Review
+    
+    public func nextReview(state: StateContext?, review: ReviewContext) -> (nextReview: Date, newState: StateContext) {
+        nextReview(from: review.date, state: state, grade: review.grade)
+    }
+    
+    public var code: SpacedRepititionType { .ankiFSRS_5(self) }
+}

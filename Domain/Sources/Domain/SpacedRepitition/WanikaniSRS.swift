@@ -9,16 +9,6 @@
 
 import Foundation
 
-extension WanikaniSRS: SpacedRepititionAlgorithm {
-    public typealias StepContext = (stage: WanikaniSRS.Stage, incorrectAnswers: Int)
-    public typealias NewContext = WanikaniSRS.Stage
-    
-    public static func nextReview(from date: Date, context: StepContext) -> (Date, NewContext) {
-        WanikaniSRS().nextReview(from: date, on: context.stage, incorrectAnswers: context.incorrectAnswers)
-    }
-}
-
-
 public final class WanikaniSRS {
     internal func nextStage(currentStage: WanikaniSRS.Stage, incorrectAnswers: Int) -> WanikaniSRS.Stage {
         let newStageValue = {
@@ -39,7 +29,7 @@ public final class WanikaniSRS {
 }
 
 extension WanikaniSRS {
-    public enum Stage: Int, CaseIterable {
+    public enum Stage: Int, CaseIterable, Codable {
         case apprentice_1 = 1
         case apprentice_2 = 2
         case apprentice_3 = 3
@@ -71,4 +61,31 @@ extension WanikaniSRS {
             }
         }
     }
+}
+
+extension WanikaniSRS {
+    public struct State: Codable {
+        public let stage: WanikaniSRS.Stage
+    }
+    
+    public struct Review: Codable {
+        public let date: Date
+        public let incorrectAnswers: Int
+    }
+}
+
+extension WanikaniSRS: SpacedRepititionAlgorithm {
+    public typealias StateContext = WanikaniSRS.State
+    public typealias ReviewContext = WanikaniSRS.Review
+    
+    public func nextReview(state: StateContext?, review: ReviewContext) -> (nextReview: Date, newState: StateContext) {
+        
+        let currentStage = state?.stage ?? .apprentice_1
+        
+        let (nextReview, newStage) = nextReview(from: review.date, on: currentStage, incorrectAnswers: review.incorrectAnswers)
+        
+        return (nextReview, .init(stage: newStage))
+    }
+    
+    public var code: SpacedRepititionType { .wanikaniSRS(self) }
 }

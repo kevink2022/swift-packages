@@ -9,58 +9,20 @@
 
 import Foundation
 
-extension SuperMemo2: SpacedRepititionAlgorithm {
-    public typealias StepContext = (
-        interval: Double?
-        , ease_factor: Double?
-        , response: SuperMemo2.Response
-    )
-    public typealias NewContext = (
-        interval: Double
-        , ease_factor: Double
-    )
-    
-    public static func nextReview(from date: Date, context: StepContext) -> (Date, NewContext) {
-        let sm2 = SuperMemo2(
-            ease_factor: context.ease_factor
-            , interval: context.interval
-            , response: context.response
-        )
-        
-        let next_interval = sm2.next_interval()
-        let next_date = date.adding(.days(Int(next_interval + 0.99))) ?? date
-        
-        let next_ease_factor = sm2.next_ease_factor()
-        
-        return (next_date, (next_interval, next_ease_factor))
-    }
-
-}
-
-public final class SuperMemo2 {
-    
-    public let ease_factor: Double?
-    public let last_interval: Double?
-    public let response: SuperMemo2.Response
-    
+public final class SuperMemo2: Codable {
+     
     public let ease_factor_floor: Double // standard: 1.3
     public let initial_ease_factor: Double // standard: 2.5
     
     public init(
-        ease_factor: Double?
-        , interval: Double?
-        , response: SuperMemo2.Response
-        , ease_factor_floor: Double = 1.3
+        ease_factor_floor: Double = 1.3
         , initial_ease_factor: Double = 2.5
     ) {
-        self.ease_factor = ease_factor
-        self.last_interval = interval
-        self.response = response
         self.ease_factor_floor = ease_factor_floor
         self.initial_ease_factor = initial_ease_factor
     }
     
-    internal func next_interval() -> Double {
+    internal func next_interval(last_interval: Double?, ease_factor: Double?) -> Double {
     
         let ease_factor = ease_factor ?? initial_ease_factor
         
@@ -72,7 +34,7 @@ public final class SuperMemo2 {
 
     }
     
-    internal func next_ease_factor() -> Double {
+    internal func next_ease_factor(ease_factor: Double?, response: SuperMemo2.Response) -> Double {
         let quality = response.quality
         let ease_factor = ease_factor ?? initial_ease_factor
         
@@ -83,7 +45,7 @@ public final class SuperMemo2 {
 }
 
 extension SuperMemo2 {
-    public enum Response: Int, CaseIterable {
+    public enum Response: Int, CaseIterable, Codable {
         case perfect = 5
         case correct_after_hesitation = 4
         case correct_with_serious_difficulty = 3
@@ -93,4 +55,43 @@ extension SuperMemo2 {
         
         var quality: Double { Double(rawValue) }
     }
+}
+
+extension SuperMemo2 {
+    public struct State: Codable {
+        /// The amount of time scheduled between the current review and the next review
+        public let interval: Double
+        /// The ease factor calculated after the current review
+        public let ease_factor: Double
+    }
+    
+    public struct Review: Codable {
+        /// The date the review took place
+        public let date: Date
+        /// The quality of the reponse
+        public let response: SuperMemo2.Response
+    }
+}
+
+extension SuperMemo2: SpacedRepititionAlgorithm {
+    public typealias StateContext = SuperMemo2.State
+    
+    public typealias ReviewContext = SuperMemo2.Review
+    
+    public func nextReview(state: StateContext?, review: ReviewContext) -> (nextReview: Date, newState: StateContext) {
+        
+        let next_interval = self.next_interval(last_interval: state?.interval, ease_factor: state?.ease_factor)
+        let next_date = review.date.adding(.days(Int(next_interval + 0.99))) ?? review.date
+        
+        let next_ease_factor = self.next_ease_factor(ease_factor: state?.ease_factor, response: review.response)
+        
+        let new_state = SuperMemo2.State(
+            interval: next_interval
+            , ease_factor: next_ease_factor
+        )
+        
+        return (next_date, new_state)
+    }
+    
+    public var code: SpacedRepititionType { .superMemo2(self) }
 }

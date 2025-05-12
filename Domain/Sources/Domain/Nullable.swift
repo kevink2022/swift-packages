@@ -7,6 +7,9 @@
 
 import Foundation
 
+/// A codable representation of no data.
+public struct Empty: Codable { }
+
 /// Passable as explicitly null when optional means 'ignore.'
 public protocol Nullable: Equatable {
     /// The representation of a 'null' object.

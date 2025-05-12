@@ -16,33 +16,44 @@ import Foundation
 /// https://www.supermemo.com/en/blog/application-of-a-computer-to-improve-the-results-obtained-in-working-with-the-supermemo-method
 /// 
 
-
-public protocol SpacedRepititionAlgorithm {
-    associatedtype StepContext
-    associatedtype NewContext
+public protocol SpacedRepititionAlgorithm: Codable {
+    /// Data from the last review, such as the level/stage.
+    associatedtype StateContext: Codable
+    /// Data from the review itself, such as the grade and date of review.
+    associatedtype ReviewContext: Codable
     
-    static func nextReview(from: Date, context: StepContext) -> (Date, NewContext)
+    /// Calculates the next review based on the state context and the review context, returning the date to schedule the next review, as well as the new state. State is `nil` on the initial review.
+    func nextReview(state: StateContext?, review: ReviewContext) -> (nextReview: Date, newState: StateContext)
+    
+    /// The code defining which context and algorithm this structure is a part of.
+    var code: SpacedRepititionType { get }
+    
+    /*
+    /// Data to configure the spaced repitition algorithm
+    associatedtype ConfigurationContext: Codable
+    
+    init(configuration: ConfigurationContext)
+    
+    /// The standard, default configuration for the algorithm.
+    var standardConfig: ConfigurationContext { get }
+    */
 }
 
-
-public final class LinearSpacedRepitition: SpacedRepititionAlgorithm {
-    public typealias StepContext = TimeDuration
-    public typealias NewContext = TimeDuration
-    
-    public static func nextReview(from date: Date, context duration: TimeDuration) -> (Date, TimeDuration) {
-        let nextDate = date.adding(duration) ?? date
-        return (nextDate, duration)
-    }
+public enum SpacedRepititionType: Codable {
+    case linear(LinearSpacedRepitition)
+    case leitnerBox(LeitnerBox)
+    case superMemo2(SuperMemo2)
+    case ankiFSRS_5(AnkiFSRS_5)
+    case wanikaniSRS(WanikaniSRS)
 }
 
-public final class AnkiSRS {
-    public enum Grade: Int, CaseIterable {
-        case forgot = 1
-        case hard = 2
-        case good = 3
-        case easy = 4
-        
-        public var value: Double { Double(self.rawValue) }
-        public var isSuccess: Bool { self != .forgot }
-    }
+public enum SpacedRepititionContext: Codable {
+    case algorithm(SpacedRepititionType)
+    case config(SpacedRepititionType)
+    case state(SpacedRepititionType)
+//    case review(SpacedRepititionType)
+}
+
+public protocol SpacedRepititionCodable: Codable {
+    var contextCode: SpacedRepititionContext { get }
 }

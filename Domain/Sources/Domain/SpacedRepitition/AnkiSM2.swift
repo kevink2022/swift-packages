@@ -21,7 +21,17 @@ public final class AnkiSM2 {
     
     let first_interval: Double
     let second_interval: Double
-    
-    
-    
+}
+
+
+public final class AnkiSRS: Codable {
+    public enum Grade: Int, CaseIterable, Codable {
+        case forgot = 1
+        case hard = 2
+        case good = 3
+        case easy = 4
+        
+        public var value: Double { Double(self.rawValue) }
+        public var isSuccess: Bool { self != .forgot }
+    }
 }
