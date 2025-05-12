@@ -73,7 +73,7 @@ extension SuperMemo2 {
     }
 }
 
-extension SuperMemo2: SpacedRepititionAlgorithm {
+extension SuperMemo2: SpacedRepetitionAlgorithm {
     public typealias StateContext = SuperMemo2.State
     
     public typealias ReviewContext = SuperMemo2.Review
@@ -93,5 +93,5 @@ extension SuperMemo2: SpacedRepititionAlgorithm {
         return (next_date, new_state)
     }
     
-    public var code: SpacedRepititionType { .superMemo2(self) }
+    public var code: SpacedRepetitionType { .superMemo2(self) }
 }

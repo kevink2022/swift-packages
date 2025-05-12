@@ -485,7 +485,7 @@ extension AnkiFSRS_5 {
 }
 
 // MARK: - Conformance
-extension AnkiFSRS_5: SpacedRepititionAlgorithm {
+extension AnkiFSRS_5: SpacedRepetitionAlgorithm {
     public typealias StateContext = AnkiFSRS_5.State
     public typealias ReviewContext = AnkiFSRS_5.Review
     
@@ -493,5 +493,5 @@ extension AnkiFSRS_5: SpacedRepititionAlgorithm {
         nextReview(from: review.date, state: state, grade: review.grade)
     }
     
-    public var code: SpacedRepititionType { .ankiFSRS_5(self) }
+    public var code: SpacedRepetitionType { .ankiFSRS_5(self) }
 }

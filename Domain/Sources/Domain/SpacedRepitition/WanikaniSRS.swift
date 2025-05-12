@@ -74,7 +74,7 @@ extension WanikaniSRS {
     }
 }
 
-extension WanikaniSRS: SpacedRepititionAlgorithm {
+extension WanikaniSRS: SpacedRepetitionAlgorithm {
     public typealias StateContext = WanikaniSRS.State
     public typealias ReviewContext = WanikaniSRS.Review
     
@@ -87,5 +87,5 @@ extension WanikaniSRS: SpacedRepititionAlgorithm {
         return (nextReview, .init(stage: newStage))
     }
     
-    public var code: SpacedRepititionType { .wanikaniSRS(self) }
+    public var code: SpacedRepetitionType { .wanikaniSRS(self) }
 }

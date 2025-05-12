@@ -1,5 +1,5 @@
 //
-//  SpacedRepitition.swift
+//  SpacedRepetition.swift
 //  Domain
 //
 //  Created by Kevin Kelly on 2/14/25.
@@ -16,7 +16,7 @@ import Foundation
 /// https://www.supermemo.com/en/blog/application-of-a-computer-to-improve-the-results-obtained-in-working-with-the-supermemo-method
 /// 
 
-public protocol SpacedRepititionAlgorithm: Codable {
+public protocol SpacedRepetitionAlgorithm: Codable {
     /// Data from the last review, such as the level/stage.
     associatedtype StateContext: Codable
     /// Data from the review itself, such as the grade and date of review.
@@ -26,10 +26,10 @@ public protocol SpacedRepititionAlgorithm: Codable {
     func nextReview(state: StateContext?, review: ReviewContext) -> (nextReview: Date, newState: StateContext)
     
     /// The code defining which context and algorithm this structure is a part of.
-    var code: SpacedRepititionType { get }
+    var code: SpacedRepetitionType { get }
     
     /*
-    /// Data to configure the spaced repitition algorithm
+    /// Data to configure the spaced Repetition algorithm
     associatedtype ConfigurationContext: Codable
     
     init(configuration: ConfigurationContext)
@@ -39,21 +39,21 @@ public protocol SpacedRepititionAlgorithm: Codable {
     */
 }
 
-public enum SpacedRepititionType: Codable {
-    case linear(LinearSpacedRepitition)
+public enum SpacedRepetitionType: Codable {
+    case linear(LinearSpacedRepetition)
     case leitnerBox(LeitnerBox)
     case superMemo2(SuperMemo2)
     case ankiFSRS_5(AnkiFSRS_5)
     case wanikaniSRS(WanikaniSRS)
 }
 
-public enum SpacedRepititionContext: Codable {
-    case algorithm(SpacedRepititionType)
-    case config(SpacedRepititionType)
-    case state(SpacedRepititionType)
-//    case review(SpacedRepititionType)
+public enum SpacedRepetitionContext: Codable {
+    case algorithm(SpacedRepetitionType)
+    case config(SpacedRepetitionType)
+    case state(SpacedRepetitionType)
+    case review(SpacedRepetitionType)
 }
 
-public protocol SpacedRepititionCodable: Codable {
-    var contextCode: SpacedRepititionContext { get }
+public protocol SpacedRepetitionCodable: Codable {
+    var contextCode: SpacedRepetitionContext { get }
 }

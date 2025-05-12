@@ -38,7 +38,7 @@ extension LeitnerBox {
     }
 }
 
-extension LeitnerBox: SpacedRepititionAlgorithm {
+extension LeitnerBox: SpacedRepetitionAlgorithm {
     public typealias StateContext = LeitnerBox.State
     public typealias ReviewContext = LeitnerBox.Review
     
@@ -48,5 +48,5 @@ extension LeitnerBox: SpacedRepititionAlgorithm {
         return (nextReview, LeitnerBox.State(level: newLevel))
     }
     
-    public var code: SpacedRepititionType { .leitnerBox(self) }
+    public var code: SpacedRepetitionType { .leitnerBox(self) }
 }

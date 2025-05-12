@@ -8,13 +8,13 @@
 import Foundation
 
 
-public final class LinearSpacedRepitition {
+public final class LinearSpacedRepetition {
     public let spacing: TimeDuration
     
     public func nextReview(from date: Date) -> Date { return date.adding(spacing) ?? date }
 }
 
-extension LinearSpacedRepitition: SpacedRepititionAlgorithm {
+extension LinearSpacedRepetition: SpacedRepetitionAlgorithm {
     public typealias StateContext = Empty
     public typealias ReviewContext = Date
     
@@ -22,6 +22,6 @@ extension LinearSpacedRepitition: SpacedRepititionAlgorithm {
         return (nextReview(from: review), Empty())
     }
     
-    public var code: SpacedRepititionType { .linear(self) }
+    public var code: SpacedRepetitionType { .linear(self) }
 }
 
