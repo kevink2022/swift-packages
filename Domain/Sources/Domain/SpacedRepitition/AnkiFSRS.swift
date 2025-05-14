@@ -141,9 +141,9 @@ public final class AnkiFSRS_5: Codable {
     }
 }
 
-// MARK: - State
+// MARK: - Context
 extension AnkiFSRS_5 {
-    public struct State: Codable {
+    public struct State: SpacedRepetitionContext {
         public let difficulty: Double
         public let stability: Double
         public let lastReviewed: Date
@@ -166,7 +166,28 @@ extension AnkiFSRS_5 {
         internal func retrievability(interval: Double, state: AnkiFSRS_5.State) -> Double {
             pow((1.0 + AnkiFSRS_5.curveMod_f * (interval / state.stability)), AnkiFSRS_5.curveMod_c)
         }
+        
+        public var code: SpacedRepetitionContextCode { .ankiFSRS_5_state(self) }
     }
+    
+    public struct Review: SpacedRepetitionContext {
+        public let grade: AnkiSRS.Grade
+        public let date: Date
+        
+        public var code: SpacedRepetitionContextCode { .ankiFSRS_5_review(self) }
+    }
+}
+
+// MARK: - Conformance
+extension AnkiFSRS_5: SpacedRepetitionAlgorithm {
+    public typealias StateContext = AnkiFSRS_5.State
+    public typealias ReviewContext = AnkiFSRS_5.Review
+    
+    public func nextReview(state: StateContext?, review: ReviewContext) -> (nextReview: Date, newState: StateContext) {
+        nextReview(from: review.date, state: state, grade: review.grade)
+    }
+    
+    public var code: SpacedRepetitionAlgorithmCode { .ankiFSRS_5(self) }
 }
 
 // MARK: - Parameters
@@ -476,22 +497,3 @@ extension AnkiFSRS_5 {
     }
 }
 
-// MARK: - Contexts
-extension AnkiFSRS_5 {
-    public struct Review: Codable {
-        public let grade: AnkiSRS.Grade
-        public let date: Date
-    }
-}
-
-// MARK: - Conformance
-extension AnkiFSRS_5: SpacedRepetitionAlgorithm {
-    public typealias StateContext = AnkiFSRS_5.State
-    public typealias ReviewContext = AnkiFSRS_5.Review
-    
-    public func nextReview(state: StateContext?, review: ReviewContext) -> (nextReview: Date, newState: StateContext) {
-        nextReview(from: review.date, state: state, grade: review.grade)
-    }
-    
-    public var code: SpacedRepetitionType { .ankiFSRS_5(self) }
-}

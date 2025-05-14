@@ -25,16 +25,20 @@ public final class LeitnerBox: Codable {
 }
 
 extension LeitnerBox {
-    public struct State: Codable {
+    public struct State: SpacedRepetitionContext {
         /// Boolean representing whether the card was correctly answered
         public let level: Int
+        
+        public var code: SpacedRepetitionContextCode { .leitnerBox_state(self) }
     }
     
-    public struct Review: Codable {
+    public struct Review: SpacedRepetitionContext {
         /// Boolean representing whether the card was correctly answered
         public let correct: Bool
         /// The date of the review
         public let date: Date
+        
+        public var code: SpacedRepetitionContextCode { .leitnerBox_review(self) }
     }
 }
 
@@ -48,5 +52,5 @@ extension LeitnerBox: SpacedRepetitionAlgorithm {
         return (nextReview, LeitnerBox.State(level: newLevel))
     }
     
-    public var code: SpacedRepetitionType { .leitnerBox(self) }
+    public var code: SpacedRepetitionAlgorithmCode { .leitnerBox(self) }
 }

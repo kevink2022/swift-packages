@@ -58,18 +58,22 @@ extension SuperMemo2 {
 }
 
 extension SuperMemo2 {
-    public struct State: Codable {
+    public struct State: SpacedRepetitionContext {
         /// The amount of time scheduled between the current review and the next review
         public let interval: Double
         /// The ease factor calculated after the current review
         public let ease_factor: Double
+        
+        public var code: SpacedRepetitionContextCode { .superMemo2_state(self) }
     }
     
-    public struct Review: Codable {
+    public struct Review: SpacedRepetitionContext {
         /// The date the review took place
         public let date: Date
         /// The quality of the reponse
         public let response: SuperMemo2.Response
+        
+        public var code: SpacedRepetitionContextCode { .superMemo2_review(self) }
     }
 }
 
@@ -81,7 +85,7 @@ extension SuperMemo2: SpacedRepetitionAlgorithm {
     public func nextReview(state: StateContext?, review: ReviewContext) -> (nextReview: Date, newState: StateContext) {
         
         let next_interval = self.next_interval(last_interval: state?.interval, ease_factor: state?.ease_factor)
-        let next_date = review.date.adding(.days(Int(next_interval + 0.99))) ?? review.date
+        let next_date = review.date.adding(.days(Int(next_interval))) ?? review.date
         
         let next_ease_factor = self.next_ease_factor(ease_factor: state?.ease_factor, response: review.response)
         
@@ -93,5 +97,5 @@ extension SuperMemo2: SpacedRepetitionAlgorithm {
         return (next_date, new_state)
     }
     
-    public var code: SpacedRepetitionType { .superMemo2(self) }
+    public var code: SpacedRepetitionAlgorithmCode { .superMemo2(self) }
 }

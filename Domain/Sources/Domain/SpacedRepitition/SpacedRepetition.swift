@@ -18,15 +18,15 @@ import Foundation
 
 public protocol SpacedRepetitionAlgorithm: Codable {
     /// Data from the last review, such as the level/stage.
-    associatedtype StateContext: Codable
+    associatedtype StateContext: SpacedRepetitionContext
     /// Data from the review itself, such as the grade and date of review.
-    associatedtype ReviewContext: Codable
+    associatedtype ReviewContext: SpacedRepetitionContext
     
     /// Calculates the next review based on the state context and the review context, returning the date to schedule the next review, as well as the new state. State is `nil` on the initial review.
     func nextReview(state: StateContext?, review: ReviewContext) -> (nextReview: Date, newState: StateContext)
     
     /// The code defining which context and algorithm this structure is a part of.
-    var code: SpacedRepetitionType { get }
+    var code: SpacedRepetitionAlgorithmCode { get }
     
     /*
     /// Data to configure the spaced Repetition algorithm
@@ -39,7 +39,7 @@ public protocol SpacedRepetitionAlgorithm: Codable {
     */
 }
 
-public enum SpacedRepetitionType: Codable {
+public enum SpacedRepetitionAlgorithmCode: Codable {
     case linear(LinearSpacedRepetition)
     case leitnerBox(LeitnerBox)
     case superMemo2(SuperMemo2)
@@ -47,13 +47,20 @@ public enum SpacedRepetitionType: Codable {
     case wanikaniSRS(WanikaniSRS)
 }
 
-public enum SpacedRepetitionContext: Codable {
-    case algorithm(SpacedRepetitionType)
-    case config(SpacedRepetitionType)
-    case state(SpacedRepetitionType)
-    case review(SpacedRepetitionType)
+public enum SpacedRepetitionContextCode: Codable {
+    case linear_state(LinearSpacedRepetition.StateContext)
+    case leitnerBox_state(LeitnerBox.StateContext)
+    case superMemo2_state(SuperMemo2.StateContext)
+    case ankiFSRS_5_state(AnkiFSRS_5.StateContext)
+    case wanikaniSRS_state(WanikaniSRS.StateContext)
+    
+    case linear_review(LinearSpacedRepetition.ReviewContext)
+    case leitnerBox_review(LeitnerBox.ReviewContext)
+    case superMemo2_review(SuperMemo2.ReviewContext)
+    case ankiFSRS_5_review(AnkiFSRS_5.ReviewContext)
+    case wanikaniSRS_review(WanikaniSRS.ReviewContext)
 }
 
-public protocol SpacedRepetitionCodable: Codable {
-    var contextCode: SpacedRepetitionContext { get }
+public protocol SpacedRepetitionContext: Codable {
+    var code: SpacedRepetitionContextCode { get }
 }

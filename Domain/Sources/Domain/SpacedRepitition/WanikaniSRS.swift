@@ -64,13 +64,17 @@ extension WanikaniSRS {
 }
 
 extension WanikaniSRS {
-    public struct State: Codable {
+    public struct State: SpacedRepetitionContext {
         public let stage: WanikaniSRS.Stage
+        
+        public var code: SpacedRepetitionContextCode { .wanikaniSRS_state(self) }
     }
     
-    public struct Review: Codable {
+    public struct Review: SpacedRepetitionContext {
         public let date: Date
         public let incorrectAnswers: Int
+        
+        public var code: SpacedRepetitionContextCode { .wanikaniSRS_review(self) }
     }
 }
 
@@ -87,5 +91,5 @@ extension WanikaniSRS: SpacedRepetitionAlgorithm {
         return (nextReview, .init(stage: newStage))
     }
     
-    public var code: SpacedRepetitionType { .wanikaniSRS(self) }
+    public var code: SpacedRepetitionAlgorithmCode { .wanikaniSRS(self) }
 }
