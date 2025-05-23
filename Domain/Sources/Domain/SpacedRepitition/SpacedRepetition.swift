@@ -43,7 +43,7 @@ public enum SpacedRepetitionAlgorithmCode: Codable {
     case linear(LinearSpacedRepetition)
     case leitnerBox(LeitnerBox)
     case superMemo2(SuperMemo2)
-    case ankiFSRS_5(AnkiFSRS_5)
+    case ankiFSRS_5(AnkiFSRS)
     case wanikaniSRS(WanikaniSRS)
 }
 
@@ -51,13 +51,13 @@ public enum SpacedRepetitionContextCode: Codable {
     case linear_state(LinearSpacedRepetition.StateContext)
     case leitnerBox_state(LeitnerBox.StateContext)
     case superMemo2_state(SuperMemo2.StateContext)
-    case ankiFSRS_5_state(AnkiFSRS_5.StateContext)
+    case ankiFSRS_state(AnkiFSRS.StateContext)
     case wanikaniSRS_state(WanikaniSRS.StateContext)
     
     case linear_review(LinearSpacedRepetition.ReviewContext)
     case leitnerBox_review(LeitnerBox.ReviewContext)
     case superMemo2_review(SuperMemo2.ReviewContext)
-    case ankiFSRS_5_review(AnkiFSRS_5.ReviewContext)
+    case ankiFSRS_review(AnkiFSRS.ReviewContext)
     case wanikaniSRS_review(WanikaniSRS.ReviewContext)
 }
 

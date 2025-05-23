@@ -83,12 +83,12 @@ extension AnySpacedRepetitionContext {
         case .linear_state(let data): self.init(data)
         case .leitnerBox_state(let data): self.init(data)
         case .superMemo2_state(let data): self.init(data)
-        case .ankiFSRS_5_state(let data): self.init(data)
+        case .ankiFSRS_state(let data): self.init(data)
         case .wanikaniSRS_state(let data): self.init(data)
         case .linear_review(let data): self.init(data)
         case .leitnerBox_review(let data): self.init(data)
         case .superMemo2_review(let data): self.init(data)
-        case .ankiFSRS_5_review(let data): self.init(data)
+        case .ankiFSRS_review(let data): self.init(data)
         case .wanikaniSRS_review(let data): self.init(data)
         }
     }

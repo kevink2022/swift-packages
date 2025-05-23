@@ -16,11 +16,15 @@ public final class LeitnerBox: Codable {
             else { 1 }
         }()
         
-        let newInterval = [1...newLevel].reduce(1) { partialResult, _ in partialResult*2 } / 2
+        let newInterval = LeitnerBox.newInterval(level: newLevel)
         
         let nextReview = date.adding(.days(newInterval)) ?? date
         
-        return (nextReview, newInterval)
+        return (nextReview, newLevel)
+    }
+    
+    static func newInterval(level: Int) -> Int {
+        1 << (level - 1)
     }
 }
 
