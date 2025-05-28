@@ -141,16 +141,6 @@ public final class AnkiFSRS: Codable {
     }
 }
 
-extension Date {
-    fileprivate func daysSince(_ date: Date) -> Double {
-        return self.timeIntervalSince(date) / (24 * 60 * 60)
-    }
-    
-    fileprivate func addingDays(_ days: Double) -> Date {
-        return self.addingTimeInterval(days * 24 * 60 * 60)
-    }
-}
-
 // MARK: - Context
 extension AnkiFSRS {
     public struct State: SpacedRepetitionContext {

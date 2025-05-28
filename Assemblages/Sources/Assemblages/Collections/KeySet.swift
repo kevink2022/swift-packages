@@ -113,33 +113,3 @@ extension KeySet: ExpressibleByDictionaryLiteral {
 extension KeySet: ArrayReadableImpl {
     var readableArray: [Element] { values }
 }
-
-/*
-extension KeySet: KeySetPublicInterface { }
-private protocol KeySetPublicInterface {
-    associatedtype Element: Identifiable
-    
-    var values: [Element] { get }
-    var count: Int { get }
-    
-    mutating func insert(_ element: Element)
-    mutating func insert(contentsOf elements: [Element])
-    func inserting(_ element: Element) -> Self
-    func inserting(contentsOf elements: [Element]) -> Self
-    
-    mutating func remove(_ element: Element)
-    mutating func remove(contentsOf elements: [Element])
-    func removing(_ element: Element) -> Self
-    func removing(contentsOf elements: [Element]) -> Self
-
-    func reduce<Result>(_ initialResult: Result, _ nextPartialResult: (Result, Element) -> Result) -> Result
-    func reduce<Result>(into initialResult: inout Result, _ updateAccumulatingResult: (inout Result, Element) -> Void)
-    
-    func filter(_ isIncluded: (Element) throws -> Bool) rethrows -> Self
-
-    func forEach(_ body: (Element) throws -> Void) rethrows
-   
-    func map<T>(_ transform: (Element) throws -> T) rethrows -> [T]
-    func compactMap<T>(_ transform: (Element) throws -> T?) rethrows -> [T]
-}
-*/

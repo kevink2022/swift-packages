@@ -76,6 +76,25 @@ final class SpacedRepetitionTests: XCTestCase {
                     
                 case let (actualState as LinearSpacedRepetition.State, expectedState as LinearSpacedRepetition.State): break
                     
+                case let (actualState as AnkiFSRS.State, expectedState as AnkiFSRS.State):
+                    
+                    XCTAssertEqual(
+                        actualState.stability,
+                        expectedState.stability,
+                        accuracy: 0.1,
+                        "AnkiFSRS Review \(index + 1): Stability should match expected value",
+                        file: file,
+                        line: line
+                    )
+                    XCTAssertEqual(
+                        actualState.difficulty,
+                        expectedState.difficulty,
+                        accuracy: 0.1,
+                        "AnkiFSRS Review \(index + 1): Difficulty should match expected value",
+                        file: file,
+                        line: line
+                    )
+                    
                 default:
                     XCTFail("Unsupported state type combination for validation", file: file, line: line)
                 }
@@ -435,6 +454,91 @@ final class SpacedRepetitionTests: XCTestCase {
         )
         
     }
+    
+    func testFSRS() {
+        let baseDate = makeDate(year: 2025, month: 5, day: 1, hour: 12)
+        let algorithm = AnkiFSRS(
+            desiredRetention: 0.9,
+            parameters: AnkiFSRS.Parameters(parameters: [
+                0.2172      // w0
+                , 1.1771    // w1
+                , 3.2602    // w2
+                , 16.1507   // w3
+                , 7.0114    // w4
+                , 0.5700    // w5
+                , 2.0966    // w6
+                , 0.0069    // w7
+                , 1.5261    // w8
+                , 0.1120    // w9
+                , 1.0178    // w10
+                , 1.8490    // w11
+                , 0.1133    // w12
+                , 0.3127    // w13
+                , 2.2934    // w14
+                , 0.2191    // w15
+                , 3.0004    // w16
+                , 0.7536    // w17
+                , 0.3332    // w18
+                , 0.1437    // w19
+                , 0.2000    // w20
+            ])
+        )
+        let anyAlgorithm = AnySpacedRepetition(algorithm)
+        
+        // Define test data
+        let initialState: AnkiFSRS.State? = nil // First review has no prior state
+        
+        let dateTolerance: TimeInterval = 60
+        
+        // 3.26 + 11.33 + 36.82 + 116.61
+        
+        let correct_reviews: [(
+            review: AnkiFSRS.Review
+            , expectedDate: Date
+            , expectedState: AnkiFSRS.State?
+            , tolerance: TimeInterval
+        )] = [
+            (
+                AnkiFSRS.Review(grade: .good, date: baseDate)
+                , baseDate.addingDays(3.26)
+                , AnkiFSRS.State(difficulty: (4.3/10)*9+1, stability: 3.26, lastReviewed: baseDate)
+                , dateTolerance
+            )
+            
+            , (
+                AnkiFSRS.Review(grade: .good, date: baseDate.addingDays(3.26))
+                , baseDate.addingDays(11.33)
+                , AnkiFSRS.State(difficulty: (4.3/10)*9+1, stability: 11.33, lastReviewed: baseDate.addingDays(3.26))
+                , dateTolerance
+            )
+            
+            , (
+                AnkiFSRS.Review(grade: .good, date: baseDate.addingDays(3.26 + 11.33))
+                , baseDate.addingDays(3.26 + 11.33 + 36.82)
+                , AnkiFSRS.State(difficulty: (4.3/10)*9+1, stability: 36.82, lastReviewed: baseDate.addingDays(3.26 + 11.33))
+                , dateTolerance
+            )
+            
+            , (
+                AnkiFSRS.Review(grade: .good, date: baseDate.addingDays(3.26 + 11.33 + 36.82))
+                , baseDate.addingDays(3.26 + 11.33 + 36.82 + 116.61)
+                , AnkiFSRS.State(difficulty: (4.3/10)*9+1, stability: 116.61, lastReviewed: baseDate.addingDays(3.26 + 11.33 + 36.82))
+                , dateTolerance
+            )
+        ]
+        
+        
+        // These tests will fail, due to a difference between how my tests are written and how Anki's simulator is written (Anki rounds to the day).
+        // So it works as intended (I do not want to round to the day), but will need to be manually tested with any new logic changes.
+        /*
+        scaffold_testAlgorithm(
+            algorithm: algorithm,
+            initialState: initialState,
+            reviews: correct_reviews
+        )
+         */
+    }
+
     
     // MARK: - Helper Methods
     

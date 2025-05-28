@@ -107,4 +107,12 @@ extension Date {
     public func subtracting(_ duration: TimeDuration, using calendar: Calendar = .current) -> Date? {
         return calendar.date(byAdding: duration.component, value: -(duration.relativeValue), to: self)
     }
+    
+    internal func daysSince(_ date: Date) -> Double {
+        return self.timeIntervalSince(date) / (24 * 60 * 60)
+    }
+    
+    internal func addingDays(_ days: Double) -> Date {
+        return self.addingTimeInterval(days * 24 * 60 * 60)
+    }
 }

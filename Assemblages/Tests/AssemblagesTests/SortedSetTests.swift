@@ -283,4 +283,21 @@ class SortedSetTests: XCTestCase {
         
         XCTAssertEqual(compactMapped, ["A", "C"])
     }
+    
+    func testEncodeDecodeIntSet() throws {
+        let array = [5, 2, 8, 1, 3]
+        let arraySorted = [1, 2, 3, 5, 8]
+        let originalSet = SortedSet(array)
+        
+        let setData = try JSONEncoder().encode(originalSet)
+        let arrayData = try JSONEncoder().encode(array)
+        
+        let decodedArrayFromSet = try JSONDecoder().decode([Int].self, from: setData)
+        let decodedSetFromArray = try JSONDecoder().decode(SortedSet<Int>.self, from: arrayData)
+        let decodedSetFromSet = try JSONDecoder().decode(SortedSet<Int>.self, from: setData)
+
+        XCTAssertEqual(decodedArrayFromSet, arraySorted)
+        XCTAssertEqual(decodedSetFromArray.values, arraySorted)
+        XCTAssertEqual(decodedSetFromSet.values, arraySorted)
+    }
 }
