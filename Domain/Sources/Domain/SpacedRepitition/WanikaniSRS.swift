@@ -63,6 +63,8 @@ extension WanikaniSRS {
     }
 }
 
+// MARK: - SRA Conformance
+
 extension WanikaniSRS {
     public struct State: SpacedRepetitionContext {
         public let stage: WanikaniSRS.Stage
@@ -92,4 +94,11 @@ extension WanikaniSRS: SpacedRepetitionAlgorithm {
     }
     
     public var code: SpacedRepetitionAlgorithmCode { .wanikaniSRS(self) }
+}
+
+
+// MARK: - Conformance
+
+extension WanikaniSRS: Equatable {
+    public static func == (lhs: WanikaniSRS, rhs: WanikaniSRS) -> Bool { true }
 }

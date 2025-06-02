@@ -554,4 +554,19 @@ final class SpacedRepetitionTests: XCTestCase {
         
         return Calendar.current.date(from: components)!
     }
+    
+    func testDecodeTimeIntervalAsLinear() {
+        let duration = TimeDuration.days(3)
+        
+        let durationData = try! JSONEncoder().encode(duration)
+        let decodedSRA = try! JSONDecoder().decode(AnySpacedRepetition.self, from: durationData)
+        
+        guard let decodedLinear = decodedSRA.data as? LinearSpacedRepetition else {
+            XCTFail("Unexpectedly failed to decode LinearSpacedRepetition"); return
+        }
+        
+        XCTAssertEqual(decodedLinear.spacing, duration)
+    }
 }
+
+

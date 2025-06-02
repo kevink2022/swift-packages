@@ -18,8 +18,12 @@ public final class LinearSpacedRepetition {
     public func nextReview(from date: Date) -> Date { return date.adding(spacing) ?? date }
 }
 
+// MARK: - SRA Conformance
+
 extension LinearSpacedRepetition {
     public struct State: SpacedRepetitionContext {
+        public static func == (lhs: LinearSpacedRepetition.State, rhs: LinearSpacedRepetition.State) -> Bool { true }
+        
         public init() { self.empty = Empty() }
         
         public var empty: Empty
@@ -28,6 +32,8 @@ extension LinearSpacedRepetition {
     }
     
     public struct Review: SpacedRepetitionContext {
+        public init(date: Date) { self.date = date }
+        
         /// The date of the review
         public let date: Date
         
@@ -45,4 +51,13 @@ extension LinearSpacedRepetition: SpacedRepetitionAlgorithm {
 
     public var code: SpacedRepetitionAlgorithmCode { .linear(self) }
 }
+
+// MARK: - Conformance
+
+extension LinearSpacedRepetition: Equatable {
+    public static func == (lhs: LinearSpacedRepetition, rhs: LinearSpacedRepetition) -> Bool {
+        lhs.spacing == rhs.spacing
+    }
+}
+
 

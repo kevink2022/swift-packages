@@ -28,6 +28,8 @@ public final class LeitnerBox: Codable {
     }
 }
 
+// MARK: - SRA Conformance
+
 extension LeitnerBox {
     public struct State: SpacedRepetitionContext {
         /// Boolean representing whether the card was correctly answered
@@ -57,4 +59,10 @@ extension LeitnerBox: SpacedRepetitionAlgorithm {
     }
     
     public var code: SpacedRepetitionAlgorithmCode { .leitnerBox(self) }
+}
+
+// MARK: - Conformance
+
+extension LeitnerBox: Equatable {
+    public static func == (lhs: LeitnerBox, rhs: LeitnerBox) -> Bool { true }
 }

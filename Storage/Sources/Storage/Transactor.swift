@@ -37,13 +37,22 @@ public final class DataTransaction<Data: Codable>: Loggable {
     public let data: Data
     
     public init(
-        _ body: Data
+        _ data: Data
         , id: UUID = UUID()
         , timestamp: Date = Date.now
     ) {
         self.id = id
         self.timestamp = timestamp
-        self.data = body
+        self.data = data
+    }
+    
+    /// Convert Assertions to a new schema while retianing the ID.
+    public func convert(with conversionScript: (Data) -> Data) -> Self {
+        .init(
+            conversionScript(data)
+            , id: self.id
+            , timestamp: self.timestamp
+        )
     }
 }
 
@@ -153,6 +162,14 @@ extension Transactor {
     public func rollbackTo(before transaction: DataTransaction<TransactionData>) async {
         await queue.send { [self] in
             try? await storage.delete(including: transaction.id)
+            if let transactions = try? await storage.load().reversed() {
+                await build(from: base, with: transactions.map{$0.data})
+            }
+        }
+    }
+    
+    public func reinitialize() async {
+        await queue.send { [self] in
             if let transactions = try? await storage.load().reversed() {
                 await build(from: base, with: transactions.map{$0.data})
             }

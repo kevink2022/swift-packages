@@ -57,6 +57,8 @@ extension SuperMemo2 {
     }
 }
 
+// MARK: - SRA Conformance
+
 extension SuperMemo2 {
     public struct State: SpacedRepetitionContext {
         /// The amount of time scheduled between the current review and the next review
@@ -99,3 +101,14 @@ extension SuperMemo2: SpacedRepetitionAlgorithm {
     
     public var code: SpacedRepetitionAlgorithmCode { .superMemo2(self) }
 }
+
+// MARK: - Conformance
+
+extension SuperMemo2: Equatable {
+    public static func == (lhs: SuperMemo2, rhs: SuperMemo2) -> Bool {
+        lhs.ease_factor_floor == rhs.ease_factor_floor
+        && lhs.initial_ease_factor == rhs.initial_ease_factor
+    }
+}
+
+

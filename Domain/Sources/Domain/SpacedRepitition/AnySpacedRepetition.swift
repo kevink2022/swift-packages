@@ -7,9 +7,7 @@
 
 import Foundation
 
-public struct AnySpacedRepetition/*: SpacedRepetitionAlgorithm */{
-    /*public typealias StateContext = AnySpacedRepetitionContext
-    public typealias ReviewContext = AnySpacedRepetitionContext*/
+public struct AnySpacedRepetition {
     
     public func nextReview(state: AnySpacedRepetitionContext?, review: AnySpacedRepetitionContext) -> (nextReview: Date, newState: AnySpacedRepetitionContext)? {
         data.typeErasedNextReview(state: state, review: review)
@@ -19,10 +17,7 @@ public struct AnySpacedRepetition/*: SpacedRepetitionAlgorithm */{
     
     internal let data: any SpacedRepetitionAlgorithm
     
-    public init(_ data: any SpacedRepetitionAlgorithm) {
-        /*if let data = data as? AnySpacedRepetition {  self.data = data.data }*/
-        self.data = data
-    }
+    public init(_ data: any SpacedRepetitionAlgorithm) { self.data = data }
 }
 
 public struct AnySpacedRepetitionContext: SpacedRepetitionContext {
@@ -50,9 +45,21 @@ extension SpacedRepetitionAlgorithm {
     }
 }
 
+// MARK: - Conformance
 
-// MARK: - Coding Boilerplate
-extension AnySpacedRepetition {
+extension AnySpacedRepetition: Equatable {
+    public static func == (lhs: AnySpacedRepetition, rhs: AnySpacedRepetition) -> Bool {
+        lhs.code == rhs.code
+    }
+}
+
+extension AnySpacedRepetitionContext: Equatable {
+    public static func == (lhs: AnySpacedRepetitionContext, rhs: AnySpacedRepetitionContext) -> Bool {
+        lhs.code == rhs.code
+    }
+}
+
+extension AnySpacedRepetition: Codable {
     internal init(code: SpacedRepetitionAlgorithmCode) {
         switch code {
         case .linear(let data): self.init(data)
@@ -71,6 +78,12 @@ extension AnySpacedRepetition {
     }
     
     public init(from decoder: Decoder) throws {
+        // Temporary conversion code from duration to linear spaced repetition
+        if let timeDuration = try? TimeDuration(from: decoder) {
+            self.init(code: .linear(LinearSpacedRepetition(spacing: timeDuration)))
+            return
+        }
+        
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let code = try container.decode(SpacedRepetitionAlgorithmCode.self, forKey: .code)
         self.init(code: code)

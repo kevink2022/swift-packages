@@ -16,7 +16,7 @@ import Foundation
 /// https://www.supermemo.com/en/blog/application-of-a-computer-to-improve-the-results-obtained-in-working-with-the-supermemo-method
 /// 
 
-public protocol SpacedRepetitionAlgorithm: Codable {
+public protocol SpacedRepetitionAlgorithm: Codable, Equatable {
     /// Data from the last review, such as the level/stage.
     associatedtype StateContext: SpacedRepetitionContext
     /// Data from the review itself, such as the grade and date of review.
@@ -39,7 +39,9 @@ public protocol SpacedRepetitionAlgorithm: Codable {
     */
 }
 
-public enum SpacedRepetitionAlgorithmCode: Codable {
+// MARK: - Conformance
+
+public enum SpacedRepetitionAlgorithmCode: Codable, Equatable {
     case linear(LinearSpacedRepetition)
     case leitnerBox(LeitnerBox)
     case superMemo2(SuperMemo2)
@@ -47,7 +49,7 @@ public enum SpacedRepetitionAlgorithmCode: Codable {
     case wanikaniSRS(WanikaniSRS)
 }
 
-public enum SpacedRepetitionContextCode: Codable {
+public enum SpacedRepetitionContextCode: Codable, Equatable {
     case linear_state(LinearSpacedRepetition.StateContext)
     case leitnerBox_state(LeitnerBox.StateContext)
     case superMemo2_state(SuperMemo2.StateContext)
@@ -61,6 +63,6 @@ public enum SpacedRepetitionContextCode: Codable {
     case wanikaniSRS_review(WanikaniSRS.ReviewContext)
 }
 
-public protocol SpacedRepetitionContext: Codable {
+public protocol SpacedRepetitionContext: Codable, Equatable {
     var code: SpacedRepetitionContextCode { get }
 }

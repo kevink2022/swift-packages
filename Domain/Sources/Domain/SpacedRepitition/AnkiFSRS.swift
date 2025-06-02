@@ -33,6 +33,36 @@ public final class AnkiFSRS: Codable {
         self.storedDesiredRetention = desiredRetention
         self.storedParameters = parameters
     }
+}
+
+// MARK: - Methods
+
+extension AnkiFSRS {
+    public func nextReview(from date: Date, state: AnkiFSRS.State?, grade: AnkiSRS.Grade) -> (nextReview: Date, newState: AnkiFSRS.State) {
+                        
+        let newState = {
+            if let beforeState = state {
+                let interval = date.daysSince(beforeState.lastReviewed)
+                
+                return AnkiFSRS.State(
+                    difficulty: difficultyAfterReview(state: beforeState, grade: grade)
+                    , stability: stabilityAfterReview(interval: interval, state: beforeState, grade: grade)
+                    , lastReviewed: date
+                )
+            } else {
+                return AnkiFSRS.State(
+                    difficulty: initialDifficulty(grade: grade),
+                    stability: initialStability(grade: grade),
+                    lastReviewed: date
+                )
+            }
+        }()
+        
+        let nextReviewInterval = nextInterval(state: newState)
+        let nextReview = date.addingDays(nextReviewInterval)
+        
+        return (nextReview, newState)
+    }
     
     internal func initialStability(grade: AnkiSRS.Grade) -> Double {
         return switch grade {
@@ -112,36 +142,10 @@ public final class AnkiFSRS: Codable {
         default: return stabilityAfterRemembered(interval: interval, state: state, grade: grade)
         }
     }
-
-    public func nextReview(from date: Date, state: AnkiFSRS.State?, grade: AnkiSRS.Grade) -> (nextReview: Date, newState: AnkiFSRS.State) {
-        
-                        
-        let newState = {
-            if let beforeState = state {
-                let interval = date.daysSince(beforeState.lastReviewed)
-                
-                return AnkiFSRS.State(
-                    difficulty: difficultyAfterReview(state: beforeState, grade: grade)
-                    , stability: stabilityAfterReview(interval: interval, state: beforeState, grade: grade)
-                    , lastReviewed: date
-                )
-            } else {
-                return AnkiFSRS.State(
-                    difficulty: initialDifficulty(grade: grade),
-                    stability: initialStability(grade: grade),
-                    lastReviewed: date
-                )
-            }
-        }()
-        
-        let nextReviewInterval = nextInterval(state: newState)
-        let nextReview = date.addingDays(nextReviewInterval)
-        
-        return (nextReview, newState)
-    }
 }
 
-// MARK: - Context
+// MARK: - SRA Conformance
+
 extension AnkiFSRS {
     public struct State: SpacedRepetitionContext {
         public let difficulty: Double
@@ -180,7 +184,6 @@ extension AnkiFSRS {
     }
 }
 
-// MARK: - Conformance
 extension AnkiFSRS: SpacedRepetitionAlgorithm {
     public typealias StateContext = AnkiFSRS.State
     public typealias ReviewContext = AnkiFSRS.Review
@@ -192,9 +195,8 @@ extension AnkiFSRS: SpacedRepetitionAlgorithm {
     public var code: SpacedRepetitionAlgorithmCode { .ankiFSRS_5(self) }
 }
 
-// MARK: - Parameters
 extension AnkiFSRS {
-    public struct Parameters: Codable {
+    public struct Parameters: Codable, Equatable {
         /*
         public let initial: Initial
         public let difficulty: Difficulty
@@ -517,6 +519,15 @@ extension AnkiFSRS {
             }
         }
          */
+    }
+}
+
+// MARK: - Conformance
+
+extension AnkiFSRS: Equatable {
+    public static func == (lhs: AnkiFSRS, rhs: AnkiFSRS) -> Bool {
+        lhs.storedDesiredRetention == rhs.storedDesiredRetention
+        && lhs.storedParameters == rhs.storedParameters
     }
 }
 
